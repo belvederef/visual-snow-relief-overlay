@@ -14,7 +14,7 @@ async function createWindow() {
   // Create the browser window.
   const win = new BrowserWindow({
     // fullscreen: true,
-    // frame: false,
+    frame: false,
     transparent: true,
     alwaysOnTop: true,
     webPreferences: {
