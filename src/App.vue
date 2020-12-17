@@ -11,8 +11,10 @@
     vue-draggable-resizable#vue-draggable(
       v-show="isMenuOpen"
       ref="vue-draggable"
-      :w="600" 
-      :h="500" 
+      :w="menu.w" 
+      :h="menu.h"
+      :x="menu.x" 
+      :y="menu.y"
       :parent="true"
       drag-handle=".drag-handle"
     )
@@ -50,8 +52,18 @@ import { debounce } from 'lodash';
   },
 })
 export default class App extends Vue {
-  // UI
+  /** UI */
   isMenuOpen = true;
+  menu = {
+    w: 600,
+    h: 500,
+    get x() {
+      return window.innerWidth / 2 - this.w / 2;
+    },
+    get y() {
+      return window.innerHeight / 2 - this.h / 2;
+    },
+  };
 
   backgroundImages: Array<{ title: string; path: string }> = [
     {
