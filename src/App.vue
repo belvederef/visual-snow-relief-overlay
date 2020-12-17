@@ -59,10 +59,10 @@ export default class App extends Vue {
 
   menuClick() {
     // Transition only for opening/closing
-    const draggableComp = this.$refs['vue-draggable'] as Vue;
-    draggableComp.$el.classList.add('transition-active');
+    const compClasses = (this.$refs['vue-draggable'] as Vue).$el.classList;
+    compClasses.add('transition-active');
     this.isMenuOpen = !this.isMenuOpen;
-    draggableComp.$el.classList.remove('trasition-active');
+    compClasses.remove('trasition-active');
   }
 }
 </script>
@@ -74,17 +74,21 @@ body {
 </style>
 
 <style lang="scss" scoped>
-$colour: red;
+$colour: rgb(41, 41, 41);
 
 .transition-active {
-  transition: ease-in-out 0.15s all;
+  transition: ease-in-out 0.15s;
 }
 
 #vue-draggable {
   background: white;
-  border: solid 2px $colour;
-  border-radius: 10px;
+  border: solid 1px #a3a3a3;
+  border-radius: 6px;
   color: $colour;
+
+  &:hover {
+    box-shadow: 0 0 11px rgba(33, 33, 33, 0.2);
+  }
 
   .drag-handle {
     margin: 1px;
@@ -96,6 +100,8 @@ $colour: red;
 
   #open-menu-button {
     cursor: pointer;
+    margin: 9px 0 0 0;
+    padding: 15px 2px;
   }
   #menu {
     background: rgb(245, 245, 245);
