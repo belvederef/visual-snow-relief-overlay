@@ -18,9 +18,9 @@
       :parent="true"
       drag-handle=".drag-handle"
     )
-      p.drag-handle ...
-      div(@click="menuToggle()")
-        h4#open-menu-button Exit
+      div.drag-handle.menu-top-bar
+        button(@click="menuToggle()") –
+        button x
       div#menu
         label Opacity level
           vue-slider.slider(
@@ -74,7 +74,6 @@ export default class App extends Vue {
   opacity = 0.1;
 
   async menuToggle() {
-    // TODO: CATCH THE TOGGLE FROM ANYWHERE. PROB NEED TO CATCH FROM ELECTRON MAIN
     await window.ipcRenderer.invoke('is-mouse-active', !this.isMenuOpen);
 
     // Transition only for opening/closing
@@ -105,6 +104,21 @@ $colour: rgb(41, 41, 41);
   transition: ease-in-out 0.15s;
 }
 
+.drag-handle.menu-top-bar {
+  margin: 1px;
+  padding: 1px 7px 1px 1px;
+  letter-spacing: 4px;
+  font-weight: 700;
+  cursor: grabbing;
+  text-align: right;
+
+  button {
+    cursor: pointer;
+    margin: 9px 3px;
+    font-size: 16px;
+  }
+}
+
 #vue-draggable {
   background: white;
   border: solid 1px #a3a3a3;
@@ -115,27 +129,12 @@ $colour: rgb(41, 41, 41);
     box-shadow: 0 0 11px rgba(33, 33, 33, 0.2);
   }
 
-  .drag-handle {
-    margin: 1px;
-    padding: 1px;
-    letter-spacing: 4px;
-    font-weight: 700;
-    cursor: grabbing;
-  }
-
-  #open-menu-button {
-    cursor: pointer;
-    margin: 9px 0 0 0;
-    padding: 15px 2px;
-  }
   #menu {
     background: rgb(245, 245, 245);
     padding: 10px;
-    // border: solid 1px rgb(209, 208, 208);
     border-radius: 5px;
     min-width: 500px;
     font-weight: 700;
-    // font-size: 1.2em;
 
     .slider {
       padding: 10px !important;
