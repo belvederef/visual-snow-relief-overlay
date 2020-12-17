@@ -83,6 +83,12 @@ export default class App extends Vue {
     this.isMenuOpen = !this.isMenuOpen;
     compClasses.remove('trasition-active');
   }
+
+  mounted() {
+    window.ipcRenderer.on('menu-hotkey-pressed', () => {
+      this.menuToggle();
+    });
+  }
 }
 </script>
 

@@ -1,6 +1,6 @@
 'use strict';
 
-import { app, protocol, BrowserWindow, ipcMain } from 'electron';
+import { app, protocol, BrowserWindow, ipcMain, globalShortcut } from 'electron';
 import { createProtocol } from 'vue-cli-plugin-electron-builder/lib';
 import installExtension, { VUEJS_DEVTOOLS } from 'electron-devtools-installer';
 import * as path from 'path';
@@ -88,7 +88,14 @@ if (isDevelopment) {
   }
 }
 
+// Custom events
 ipcMain.handle('is-mouse-active', async (_, isMouseActive) => {
   if (!win) return;
   win.setIgnoreMouseEvents(!isMouseActive);
+});
+
+app.whenReady().then(() => {
+  globalShortcut.register('CommandOrControl+Alt+0', () => {
+    win!.webContents.send('menu-hotkey-pressed');
+  });
 });
