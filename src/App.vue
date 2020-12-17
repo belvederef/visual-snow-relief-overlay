@@ -1,21 +1,25 @@
 <template lang="pug">
-  #app
+  #app(
+    @keyup.esc.exact="menuToggle()"
+    :tabindex="0"
+  )
     img#background-img(
       :src="backgroundImages[0].path"
       :style="{ opacity }"
     )
 
     vue-draggable-resizable#vue-draggable(
+      v-show="isMenuOpen"
       ref="vue-draggable"
-      :w="isMenuOpen ? 600 : 50" 
-      :h="isMenuOpen ? 500 : 80" 
+      :w="600" 
+      :h="500" 
       :parent="true"
       drag-handle=".drag-handle"
     )
       p.drag-handle ...
-      div(@click="menuClick()")
-        h4#open-menu-button {{ isMenuOpen? 'Back' : 'Menu' }}
-      div#menu(v-show="isMenuOpen")
+      div(@click="menuToggle()")
+        h4#open-menu-button Exit
+      div#menu
         label Opacity level
           vue-slider.slider(
             :enable-cross="false"
@@ -47,7 +51,7 @@ import { debounce } from 'lodash';
 })
 export default class App extends Vue {
   // UI
-  isMenuOpen = false;
+  isMenuOpen = true;
 
   backgroundImages: Array<{ title: string; path: string }> = [
     {
@@ -57,7 +61,10 @@ export default class App extends Vue {
   ];
   opacity = 0.1;
 
-  menuClick() {
+  async menuToggle() {
+    // TODO: CATCH THE TOGGLE FROM ANYWHERE. PROB NEED TO CATCH FROM ELECTRON MAIN
+    await window.ipcRenderer.invoke('is-mouse-active', !this.isMenuOpen);
+
     // Transition only for opening/closing
     const compClasses = (this.$refs['vue-draggable'] as Vue).$el.classList;
     compClasses.add('transition-active');
