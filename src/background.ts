@@ -1,6 +1,6 @@
 'use strict';
 
-import { app, protocol, BrowserWindow, ipcMain, globalShortcut } from 'electron';
+import { app, protocol, BrowserWindow, ipcMain, globalShortcut, screen } from 'electron';
 import { createProtocol } from 'vue-cli-plugin-electron-builder/lib';
 import installExtension, { VUEJS_DEVTOOLS } from 'electron-devtools-installer';
 import * as path from 'path';
@@ -16,7 +16,7 @@ let win: BrowserWindow | null = null;
 async function createWindow() {
   // Create the browser window.
   win = new BrowserWindow({
-    fullscreen: true,
+    // fullscreen: true,
     transparent: true,
     frame: false,
     alwaysOnTop: true,
@@ -28,6 +28,11 @@ async function createWindow() {
       preload: path.join(app.getAppPath(), 'preload.js'),
     },
   });
+  const { width, height } = screen.getPrimaryDisplay().bounds;
+  win.setSize(width, height);
+
+  // win.maximize();
+  // win.setAlwaysOnTop(true);
 
   if (process.env.WEBPACK_DEV_SERVER_URL) {
     // Load the url of the dev server if in development mode
