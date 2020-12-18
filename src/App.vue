@@ -4,7 +4,7 @@
     :tabindex="0"
   )
     img#background-img(
-      :src="backgroundImages[0].path"
+      :src="backgroundImages[selectedImgIdx].path"
       :style="{ opacity }"
     )
 
@@ -22,17 +22,26 @@
         button(@click="menuToggle()") –
         button x
       div#menu
-        label Opacity level
-          vue-slider.slider(
-            :enable-cross="false"
-            :value="opacity"
-            :min="0.05"
-            :max="0.5"
-            :adsorb="true"
-            :interval="0.05"
-            :marks="value => ({ label: value })"
-            @change="opacity = $event"
-          )
+        .group
+          label Opacity level
+            vue-slider.slider(
+              :enable-cross="false"
+              :value="opacity"
+              :min="0.05"
+              :max="0.5"
+              :adsorb="true"
+              :interval="0.05"
+              :marks="value => ({ label: value })"
+              @change="opacity = $event"
+            )
+        .group
+          label Image
+            select(@change="selectedImgIdx = +$event.target.value")
+              option(
+                v-for="(img, idx) in backgroundImages"
+                :value="idx"
+                :selected="idx === selectedImgIdx"
+              ) {{ img.title }}
 
 </template>
 
@@ -65,10 +74,27 @@ export default class App extends Vue {
     },
   };
 
+  selectedImgIdx = 0;
   backgroundImages: Array<{ title: string; path: string }> = [
     {
-      title: 'static 1',
+      title: 'Black & White 1',
       path: '/assets/static1.gif',
+    },
+    {
+      title: 'Black & White 2',
+      path: '/assets/static2.gif',
+    },
+    {
+      title: 'Black & White Pixelated',
+      path: '/assets/static4.gif',
+    },
+    {
+      title: 'Fine Dots',
+      path: '/assets/static6.gif',
+    },
+    {
+      title: 'Colour 1',
+      path: '/assets/static3.gif',
     },
   ];
   opacity = 0.1;
@@ -135,6 +161,10 @@ $colour: rgb(41, 41, 41);
     border-radius: 5px;
     min-width: 500px;
     font-weight: 700;
+
+    .group {
+      margin-bottom: 50px;
+    }
 
     .slider {
       padding: 10px !important;
