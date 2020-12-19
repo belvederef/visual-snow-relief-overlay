@@ -1,8 +1,5 @@
 <template lang="pug">
-  #app(
-    @keyup.esc.exact="menuToggle()"
-    :tabindex="0"
-  )
+  #app
     img#background-img(
       :src="backgroundImages[selectedImgIdx].path"
       :style="{ opacity }"
@@ -44,7 +41,8 @@
               :marks="value => ({ label: value })"
               @change="opacity = $event"
             )
-
+      div.info
+        p Press Ctrl+Alt+0 to open/close this menu at any time
 </template>
 
 <script lang="ts">
@@ -128,6 +126,12 @@ body {
 <style lang="scss" scoped>
 $colour: rgb(41, 41, 41);
 
+.info {
+  width: inherit;
+  position: absolute;
+  bottom: 0;
+}
+
 .transition-active {
   transition: ease-in-out 0.15s;
 }
@@ -193,5 +197,6 @@ $colour: rgb(41, 41, 41);
   color: #2c3e50;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell,
     'Open Sans', 'Helvetica Neue', sans-serif;
+  overflow: hidden;
 }
 </style>
