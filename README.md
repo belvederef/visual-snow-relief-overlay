@@ -1,14 +1,11 @@
 <sub><em>
-If you can, consider supporting me. This way, I can keep building tools that can help the community.  
-Give and give back :heart:
+If you can, consider supporting me. This way, I can keep creating and improving tools that help the community.  
+Give and take :heart:
 </em></sub>
 
 <a href="http://buymeacoffee.com/belvederef" target="_blank">
   <img src="./public/assets/support.png" alt="Support Me" width="140px" >
 </a>
-
-
-
 
 # Visual Snow Overlay
 
