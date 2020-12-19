@@ -23,6 +23,16 @@
         button x
       div#menu
         .group
+          label Image
+            br
+            select(@change="selectedImgIdx = +$event.target.value")
+              option(
+                v-for="(img, idx) in backgroundImages"
+                :value="idx"
+                :selected="idx === selectedImgIdx"
+              ) {{ img.title }}
+
+        .group
           label Opacity level
             vue-slider.slider(
               :enable-cross="false"
@@ -34,14 +44,6 @@
               :marks="value => ({ label: value })"
               @change="opacity = $event"
             )
-        .group
-          label Image
-            select(@change="selectedImgIdx = +$event.target.value")
-              option(
-                v-for="(img, idx) in backgroundImages"
-                :value="idx"
-                :selected="idx === selectedImgIdx"
-              ) {{ img.title }}
 
 </template>
 
@@ -156,19 +158,19 @@ $colour: rgb(41, 41, 41);
   }
 
   #menu {
-    background: rgb(245, 245, 245);
     padding: 10px;
     border-radius: 5px;
     min-width: 500px;
     font-weight: 700;
 
     .group {
-      margin-bottom: 50px;
+      background: rgb(245, 245, 245);
+      padding: 30px;
+      border-bottom: solid 1px #a3a3a3;
     }
 
     .slider {
       padding: 10px !important;
-      margin: 10px;
     }
   }
 }
