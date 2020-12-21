@@ -17,7 +17,7 @@
     )
       div.drag-handle.menu-top-bar
         button(@click="menuToggle()") –
-        button x
+        button(@click="closeWindow()") x
       div#menu
         .group
           label Image
@@ -107,6 +107,9 @@ export default class App extends Vue {
     compClasses.add('transition-active');
     this.isMenuOpen = !this.isMenuOpen;
     compClasses.remove('trasition-active');
+  }
+  async closeWindow() {
+    await window.ipcRenderer.invoke('close-app');
   }
 
   mounted() {

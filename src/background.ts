@@ -98,7 +98,11 @@ ipcMain.handle('is-mouse-active', async (_, isMouseActive) => {
   if (!win) return;
   win.setIgnoreMouseEvents(!isMouseActive);
 });
+ipcMain.handle('close-app', async () => {
+  app.quit();
+});
 
+// Hotkey
 app.whenReady().then(() => {
   globalShortcut.register('CommandOrControl+Alt+0', () => {
     win!.webContents.send('menu-hotkey-pressed');
