@@ -62,24 +62,6 @@ app.on('activate', () => {
   if (BrowserWindow.getAllWindows().length === 0) createWindow();
 });
 
-// This method will be called when Electron has finished
-// initialization and is ready to create browser windows.
-// Some APIs can only be used after this event occurs.
-app.on('ready', async () => {
-  // necessary to make the app transparent
-  await new Promise(r => setTimeout(r, 500));
-
-  if (isDevelopment && !process.env.IS_TEST) {
-    // Install Vue Devtools
-    try {
-      await installExtension(VUEJS_DEVTOOLS);
-    } catch (e) {
-      console.error('Vue Devtools failed to install:', e.toString());
-    }
-  }
-  createWindow();
-});
-
 // Exit cleanly on request from parent process in development mode.
 if (isDevelopment) {
   if (process.platform === 'win32') {
@@ -104,11 +86,27 @@ ipcMain.handle('close-app', async () => {
   app.quit();
 });
 
-// Hotkey
-app.whenReady().then(() => {
+// This method will be called when Electron has finished
+// initialization and is ready to create browser windows.
+// Some APIs can only be used after this event occurs.
+app.on('ready', async () => {
+  // necessary to make the app transparent
+  await new Promise(r => setTimeout(r, 500));
+
+  // Register menu open/close hotkey
   globalShortcut.register('CommandOrControl+Alt+0', () => {
     win!.webContents.send('menu-hotkey-pressed');
   });
+
+  if (isDevelopment && !process.env.IS_TEST) {
+    // Install Vue Devtools
+    try {
+      await installExtension(VUEJS_DEVTOOLS);
+    } catch (e) {
+      console.error('Vue Devtools failed to install:', e.toString());
+    }
+  }
+  createWindow();
 });
 
 // Flags needed on linux to make the overlay transparent
