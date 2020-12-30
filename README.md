@@ -3,7 +3,7 @@ If you can, consider supporting me. This way, I can keep creating and improving 
 Give and take :heart:
 </em></sub>
 
-<a href="http://buymeacoffee.com/belvederef" target="_blank">
+<a href="https://ko-fi.com/belvederef" target="_blank">
   <img src="./public/assets/support.png" alt="Support Me" width="140px" >
 </a>
 
