@@ -2,6 +2,21 @@ module.exports = {
   pluginOptions: {
     electronBuilder: {
       preload: 'src/preload.ts',
+      builderOptions: {
+        appId: 'com.belvederef.vs-overlay',
+        copyright: 'Copyright © 2020 Francesco Belvedere',
+        productName: 'VS Relief',
+        mac: {
+          category: 'public.app-category.utilities',
+        },
+        win: {
+          target: ['portable', 'NSIS'],
+        },
+        linux: {
+          target: ['AppImage', 'pacman'],
+        },
+        files: ['**/*', 'build/icons/*'],
+      },
     },
   },
   css: {

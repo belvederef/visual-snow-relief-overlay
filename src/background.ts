@@ -30,11 +30,10 @@ async function createWindow() {
       preload: path.join(app.getAppPath(), 'preload.js'),
     },
   });
-  const { width, height } = screen.getPrimaryDisplay().bounds;
-  win.setSize(width, height);
+  // const { width, height } = screen.getPrimaryDisplay().bounds;
+  // win.setSize(width, height);
 
-  // win.maximize();
-  // win.setAlwaysOnTop(true);
+  win.maximize();
 
   if (process.env.WEBPACK_DEV_SERVER_URL) {
     // Load the url of the dev server if in development mode
