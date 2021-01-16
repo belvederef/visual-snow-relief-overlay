@@ -23,3 +23,5 @@ yarn-error.log*
 *.sw*
 #Electron-builder output
 /dist_electron
+
+macos-virtualbox
