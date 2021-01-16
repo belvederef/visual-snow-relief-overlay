@@ -7,6 +7,7 @@ module.exports = {
         copyright: 'Copyright © 2020 Francesco Belvedere',
         productName: 'VS Relief',
         mac: {
+          target: ['dmg', '7z'],
           category: 'public.app-category.utilities',
         },
         win: {
