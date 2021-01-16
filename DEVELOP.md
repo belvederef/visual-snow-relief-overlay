@@ -18,6 +18,7 @@ docker run --rm -ti \
 Once inside the container:
 
 ```bash
+yarn electron:generate-icons
 yarn electron:build -w
 ```
 
@@ -35,6 +36,7 @@ After the VM boots, continue the script.
 To build, use:
 
 ```bash
+yarn electron:generate-icons
 yarn electron:build -m
 ```
 
@@ -43,5 +45,6 @@ yarn electron:build -m
 In a linux environment, simply run:
 
 ```bash
+yarn electron:generate-icons
 yarn electron:build -l
 ```
