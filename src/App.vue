@@ -42,7 +42,7 @@
               @change="opacity = $event"
             )
       div.info
-        p Press Ctrl+Alt+0 to open/close this menu at any time
+        p Press Ctrl+Alt+0 (or Cmd+Alt+0 on Mac) to open/close this menu at any time
 </template>
 
 <script lang="ts">
