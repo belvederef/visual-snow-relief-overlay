@@ -1,22 +1,23 @@
 {
   "name": "visual-snow-relief-overlay",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "author": "belvederef <francescobelvedere@hotmail.com>",
   "description": "A screen overlay that might help people affected by the visual snow syndrome",
-  "private": true,
   "scripts": {
+    "serve": "vue-cli-service serve",
     "build": "vue-cli-service build",
     "lint": "vue-cli-service lint",
-    "electron:build": "vue-cli-service electron:build",
     "electron:serve": "vue-cli-service electron:serve",
+    "electron:build": "vue-cli-service electron:build",
+    "electron:publish": "vue-cli-service electron:build -p always",
     "electron:generate-icons": "electron-icon-builder --input=./public/icon.png --output=build --flatten",
     "postinstall": "electron-builder install-app-deps",
-    "postuninstall": "electron-builder install-app-deps",
-    "serve": "vue-cli-service serve"
+    "postuninstall": "electron-builder install-app-deps"
   },
   "main": "background.js",
   "dependencies": {
     "core-js": "^3.6.5",
+    "electron-updater": "^4.3.5",
     "lodash.debounce": "^4.0.8",
     "pug": "^2.0.3",
     "pug-plain-loader": "^1.0.0",

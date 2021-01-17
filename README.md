@@ -34,6 +34,28 @@ In addition to the static, or snow, patients can experience additional visual sy
 
 The causes of visual snow syndrome are currently unknown. Some key features of the syndrome however, point to a neurological disorder of visual processing in the brain cortex.
 
+## Download
+
+Download the latest package available for your operating system from the [release page](./releases). Read below for notes on the versions provided.
+
+### Windows
+
+The app is provided as both an installer ("Setup" in the file name) and an executable (.exe). The installer is recommended, as you will receive updates that improve the app automatically.
+
+### Mac
+
+The app is provided as both an installer (.dmg) and a compressed executable (.7z). The installer is recommended, as you will receive updates that improve the app automatically.
+
+### Linux
+
+The app is provided as an AppImage executable file that automatically receives updates. To make the file executable after download, run the following line replacing `FILE_NAME` with the name of the package you downloaded:
+
+```bash
+chmod a+x FILE_NAME.AppImage
+```
+
+Alternatively, right click on the file and find the option to make the file executable (generally under the "permissions" tab).
+
 ## Join the research
 
 Help the scientific community find a solution to Visual Snow, your help is crucial!

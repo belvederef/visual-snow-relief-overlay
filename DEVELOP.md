@@ -1,4 +1,22 @@
-# Development instructions
+# Development
+
+To get started, install the project dependencies with:
+
+```bash
+yarn install # or npm install
+```
+
+Run the electron project with:
+
+```bash
+yarn electron:serve # or npm run electron:serve
+```
+
+## Building and Publishing Instructions
+
+You can only build the files from the respective OSs. Unless you own such systems, to deploy use a Docker container for Windows and a VM for Mac.
+
+For new versions, bump up the version number in `package.json`.
 
 ### Windows
 
@@ -18,14 +36,16 @@ docker run --rm -ti \
 Once inside the container:
 
 ```bash
+yarn
 yarn electron:generate-icons
-yarn electron:build -w
+yarn electron:publish -w # or yarn electron:build -w to build only
+chown -R `stat -c "%u:%g" ./dist_electron` ./dist_electron  # change ownership of the files created by the Docker container
 ```
 
-### MacOs
+### MacOS
 
 You need Virtualbox on your machine. Run the automated script you find at https://github.com/myspaghetti/macos-virtualbox to create a macOs VM.
-Depending on the CPU you have, it might error and halt at some point, from which you will have to select a different cpu profile. For Ryzen 5, this works:
+Depending on the CPU you have, it might error and halt at some point, from which you will have to select a different cpu profile. For a Ryzen 5, this works:
 
 ```bash
 VBoxManage modifyvm "macOS" --cpu-profile "Intel Xeon X5482 3.20GHz"
@@ -37,7 +57,7 @@ To build, use:
 
 ```bash
 yarn electron:generate-icons
-yarn electron:build -m
+yarn electron:publish -m # or yarn electron:build -m to build only
 ```
 
 ### Linux
@@ -46,5 +66,5 @@ In a linux environment, simply run:
 
 ```bash
 yarn electron:generate-icons
-yarn electron:build -l
+yarn electron:publish -l # or yarn electron:build -l to build only
 ```
