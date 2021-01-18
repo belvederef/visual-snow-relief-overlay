@@ -16,8 +16,15 @@
       drag-handle=".drag-handle"
     )
       div.drag-handle.menu-top-bar
-        button(@click="menuToggle()") –
-        button(@click="closeWindow()") x
+        .left-aligned
+          a(
+            href="https://ko-fi.com/belvederef"
+            target="_blank"
+          )
+            img#support-button(src="/assets/support.png")
+        .right-aligned
+          button(@click="menuToggle()") –
+          button(@click="closeWindow()") x
       div#menu
         .group
           label Image
@@ -43,7 +50,6 @@
             )
       div.info
         p Press Ctrl+Alt+0 (or Cmd+Alt+0 on Mac) to open/close this menu at any time
-        p Support at ko-fi.com/belvederef
 </template>
 
 <script lang="ts">
@@ -146,8 +152,20 @@ $colour: rgb(41, 41, 41);
   letter-spacing: 4px;
   font-weight: 700;
   cursor: grabbing;
-  text-align: right;
+  display: grid;
+  grid-template-columns: 50% 50%;
 
+  .left-aligned {
+    text-align: left;
+  }
+  .right-aligned {
+    text-align: right;
+  }
+
+  #support-button {
+    margin: 3px 0 0 3px;
+    height: 2.3em;
+  }
   button {
     cursor: pointer;
     margin: 9px 3px;

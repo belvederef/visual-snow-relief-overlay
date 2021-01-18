@@ -1,6 +1,6 @@
 'use strict';
 
-import { app, protocol, BrowserWindow, ipcMain, globalShortcut } from 'electron';
+import { app, protocol, BrowserWindow, ipcMain, globalShortcut, shell } from 'electron';
 import { createProtocol } from 'vue-cli-plugin-electron-builder/lib';
 import installExtension, { VUEJS_DEVTOOLS } from 'electron-devtools-installer';
 import { autoUpdater } from 'electron-updater';
@@ -106,8 +106,14 @@ app.on('ready', async () => {
       console.error('Vue Devtools failed to install:', e.toString());
     }
   }
-  createWindow();
+  await createWindow();
   await autoUpdater.checkForUpdatesAndNotify();
+
+  // Open links in default browser
+  win!.webContents.on('new-window', (e, url) => {
+    e.preventDefault();
+    shell.openExternal(url);
+  });
 });
 
 // Flags needed on linux to make the overlay transparent
