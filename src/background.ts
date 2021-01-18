@@ -1,8 +1,9 @@
 'use strict';
 
-import { app, protocol, BrowserWindow, ipcMain, globalShortcut, screen } from 'electron';
+import { app, protocol, BrowserWindow, ipcMain, globalShortcut } from 'electron';
 import { createProtocol } from 'vue-cli-plugin-electron-builder/lib';
 import installExtension, { VUEJS_DEVTOOLS } from 'electron-devtools-installer';
+import { autoUpdater } from 'electron-updater';
 import * as path from 'path';
 
 const isDevelopment = process.env.NODE_ENV !== 'production';
@@ -106,6 +107,7 @@ app.on('ready', async () => {
     }
   }
   createWindow();
+  await autoUpdater.checkForUpdatesAndNotify();
 });
 
 // Flags needed on linux to make the overlay transparent

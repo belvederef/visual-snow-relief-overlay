@@ -5,7 +5,7 @@ module.exports = {
       builderOptions: {
         appId: 'com.belvederef.vs-overlay',
         copyright: 'Copyright © 2020 Francesco Belvedere',
-        productName: 'VS Relief',
+        productName: 'VS Relief Overlay',
         mac: {
           target: ['dmg', '7z'],
           category: 'public.app-category.utilities',
@@ -14,9 +14,16 @@ module.exports = {
           target: ['portable', 'NSIS'],
         },
         linux: {
-          target: ['AppImage', 'pacman'],
+          target: ['AppImage'],
         },
         files: ['**/*', 'build/icons/*'],
+        publish: [
+          {
+            provider: 'github',
+            owner: 'belvederef',
+            repo: 'visual-snow-relief-overlay',
+          },
+        ],
       },
     },
   },

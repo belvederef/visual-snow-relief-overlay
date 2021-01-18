@@ -43,6 +43,7 @@
             )
       div.info
         p Press Ctrl+Alt+0 (or Cmd+Alt+0 on Mac) to open/close this menu at any time
+        p Support at ko-fi.com/belvederef
 </template>
 
 <script lang="ts">
