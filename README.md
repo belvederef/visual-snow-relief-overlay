@@ -16,7 +16,7 @@ This experimental project stems from the conjecture that the prolonged exposure 
 
 Several people have reported that watching static noise "freezes" their visual snow symptoms and allows to gain clear vision, although only for less than a minute on average. [This video](https://www.youtube.com/watch?v=800f9UNiF4Y) is quoted by many as providing this result. The static noise could be able to stimulate the areas of the brain that cause visual snow and trigger a response.
 
-Try to relax while you look at your screen through the static. Many people suggest they were most successful managing the symptoms of Visual Snow when practicing meditation and relaxation. **If looking at the static makes you feel dizzy, stop immediately.**
+Try to relax while you look at your screen through the static. Many people suggest they were most successful in managing the symptoms of Visual Snow when practising meditation and relaxation. **If looking at the static makes you feel dizzy, stop immediately.**
 
 ---
 
