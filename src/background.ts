@@ -120,4 +120,9 @@ app.on('ready', async () => {
 if (process.platform === 'linux') {
   app.commandLine.appendSwitch('enable-transparent-visuals');
   app.commandLine.appendSwitch('disable-gpu');
+  setInterval(() => {
+    // Hotfix for linux that does not place the window always on top
+    // Waiting for fix from electron
+    if (win) win.setAlwaysOnTop(true);
+  }, 200);
 }
