@@ -16,7 +16,7 @@ This experimental project stems from the conjecture that the prolonged exposure 
 
 Several people have reported that watching static noise "freezes" their visual snow symptoms and allows to gain clear vision, although only for less than a minute on average. [This video](https://www.youtube.com/watch?v=800f9UNiF4Y) is quoted by many as providing this result. The static noise could be able to stimulate the areas of the brain that cause visual snow and trigger a response.
 
-Try to relax while you look at your screen through the static. Many people suggest they were most successful managing the symptoms of Visual Snow when practicing meditation and relaxation. **If looking at the static makes you feel dizzy, stop immediately.**
+Try to relax while you look at your screen through the static. Many people suggest they were most successful in managing the symptoms of Visual Snow when practising meditation and relaxation. **If looking at the static makes you feel dizzy, stop immediately.**
 
 ---
 
@@ -36,11 +36,11 @@ The causes of visual snow syndrome are currently unknown. Some key features of t
 
 ## Download
 
-Download the latest package available for your operating system from the [release page](./releases). Read below for notes on the versions provided.
+Download the latest package available for your operating system from the [release page](https://github.com/belvederef/visual-snow-relief-overlay/releases). Read below for notes on the versions provided.
 
 ### Windows
 
-The app is provided as both an installer ("Setup" in the file name) and an executable (.exe). The installer is recommended, as you will receive updates that improve the app automatically.
+The app is provided as both an installer (.exe file with "Setup" in the name) and an executable (.exe only). The installer is recommended, as you will receive updates that improve the app automatically.
 
 ### Mac
 
@@ -63,3 +63,5 @@ Help the scientific community find a solution to Visual Snow, your help is cruci
 - Join clinical trials on `ClinicalTrials.gov` [Visual Snow Syndrome page](https://www.clinicaltrials.gov/ct2/results?cond=Visual+Snow+Syndrome&term=&cntry=&state=&city=&dist=).
 
 - Follow the [Eye on Vision foundation](http://www.eyeonvision.org/), where research groups are formed.
+
+- Follow the [Visual Snow Initiative](https://www.visualsnowinitiative.org/), which aids the research and can offers "hope, resources, and the Cure of Understanding".
