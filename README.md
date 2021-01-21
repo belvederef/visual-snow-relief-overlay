@@ -63,3 +63,5 @@ Help the scientific community find a solution to Visual Snow, your help is cruci
 - Join clinical trials on `ClinicalTrials.gov` [Visual Snow Syndrome page](https://www.clinicaltrials.gov/ct2/results?cond=Visual+Snow+Syndrome&term=&cntry=&state=&city=&dist=).
 
 - Follow the [Eye on Vision foundation](http://www.eyeonvision.org/), where research groups are formed.
+
+- Follow the [Visual Snow Initiative](https://www.visualsnowinitiative.org/), which aids the research and can offers "hope, resources, and the Cure of Understanding".
