@@ -40,7 +40,7 @@ Download the latest package available for your operating system from the [releas
 
 ### Windows
 
-The app is provided as both an installer ("Setup" in the file name) and an executable (.exe). The installer is recommended, as you will receive updates that improve the app automatically.
+The app is provided as both an installer (.exe file with "Setup" in the name) and an executable (.exe only). The installer is recommended, as you will receive updates that improve the app automatically.
 
 ### Mac
 
