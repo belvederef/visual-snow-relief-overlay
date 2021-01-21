@@ -36,7 +36,7 @@ The causes of visual snow syndrome are currently unknown. Some key features of t
 
 ## Download
 
-Download the latest package available for your operating system from the [release page](./releases). Read below for notes on the versions provided.
+Download the latest package available for your operating system from the [release page](https://github.com/belvederef/visual-snow-relief-overlay/releases). Read below for notes on the versions provided.
 
 ### Windows
 
