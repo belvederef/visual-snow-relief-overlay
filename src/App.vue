@@ -6,7 +6,7 @@
     )
 
     vue-draggable-resizable#vue-draggable(
-      v-show="isMenuOpen"
+      v-show="shouldDisplayMenu && isMenuOpen"
       ref="vue-draggable"
       :w="menu.w" 
       :h="menu.h"
@@ -29,7 +29,7 @@
         .group
           label Image
             br
-            select(@change="selectedImgIdx = +$event.target.value")
+            select(@change="onBackgroundImgChange")
               option(
                 v-for="(img, idx) in backgroundImages"
                 :value="idx"
@@ -46,7 +46,7 @@
               :adsorb="true"
               :interval="0.05"
               :marks="value => ({ label: value })"
-              @change="opacity = $event"
+              @change="onOpacityChange"
             )
       div.info
         p Press Ctrl+Alt+0 (or Cmd+Alt+0 on Mac) to open/close this menu at any time
@@ -57,7 +57,6 @@ import { Component, Vue } from 'vue-property-decorator';
 import ClickOutside from 'vue-click-outside';
 import VueSlider from 'vue-slider-component';
 import 'vue-slider-component/theme/antd.css';
-import { debounce } from 'lodash';
 
 @Component({
   components: {
@@ -69,6 +68,7 @@ import { debounce } from 'lodash';
 })
 export default class App extends Vue {
   /** UI */
+  shouldDisplayMenu = new URLSearchParams(window.location.search).get('monitor-idx') === '1';
   isMenuOpen = true;
   menu = {
     w: 600,
@@ -115,6 +115,12 @@ export default class App extends Vue {
     this.isMenuOpen = !this.isMenuOpen;
     compClasses.remove('trasition-active');
   }
+  async onOpacityChange(opacity: number) {
+    await window.ipcRenderer.invoke('change-overlay-opacity', opacity);
+  }
+  async onBackgroundImgChange(event: { target: HTMLSelectElement }) {
+    await window.ipcRenderer.invoke('change-background-img', +event.target.value);
+  }
   async closeWindow() {
     await window.ipcRenderer.invoke('close-app');
   }
@@ -122,6 +128,12 @@ export default class App extends Vue {
   mounted() {
     window.ipcRenderer.on('menu-hotkey-pressed', () => {
       this.menuToggle();
+    });
+    window.ipcRenderer.on('change-overlay-opacity', (_, opacity: number) => {
+      this.opacity = opacity;
+    });
+    window.ipcRenderer.on('change-background-img', (_, imgIdx: number) => {
+      this.selectedImgIdx = imgIdx;
     });
   }
 }

@@ -1,6 +1,14 @@
 'use strict';
 
-import { app, protocol, BrowserWindow, ipcMain, globalShortcut, shell } from 'electron';
+import {
+  app,
+  protocol,
+  BrowserWindow,
+  ipcMain,
+  globalShortcut,
+  shell,
+  screen,
+} from 'electron';
 import { createProtocol } from 'vue-cli-plugin-electron-builder/lib';
 import installExtension, { VUEJS_DEVTOOLS } from 'electron-devtools-installer';
 import { autoUpdater } from 'electron-updater';
@@ -13,11 +21,10 @@ protocol.registerSchemesAsPrivileged([
   { scheme: 'app', privileges: { secure: true, standard: true } },
 ]);
 
-let win: BrowserWindow | null = null;
-async function createWindow() {
+const wins: Array<BrowserWindow> = [];
+async function createWindow(display: Electron.Display) {
   // Create the browser window.
-  win = new BrowserWindow({
-    // fullscreen: true,
+  const win = new BrowserWindow({
     transparent: true,
     frame: false,
     alwaysOnTop: true,
@@ -31,20 +38,19 @@ async function createWindow() {
       preload: path.join(app.getAppPath(), 'preload.js'),
     },
   });
-  // const { width, height } = screen.getPrimaryDisplay().bounds;
-  // win.setSize(width, height);
-
+  win.setPosition(display.bounds.x, display.bounds.y);
   win.maximize();
 
   if (process.env.WEBPACK_DEV_SERVER_URL) {
     // Load the url of the dev server if in development mode
-    await win.loadURL(process.env.WEBPACK_DEV_SERVER_URL as string);
+    await win.loadURL(`${process.env.WEBPACK_DEV_SERVER_URL}?monitor-idx=${wins.length + 1}`);
     // if (!process.env.IS_TEST) win.webContents.openDevTools();
   } else {
     createProtocol('app');
     // Load the index.html when not in development
-    win.loadURL('app://./index.html');
+    win.loadURL(`app://./index.html?monitor-idx=${wins.length + 1}`);
   }
+  wins.push(win);
 }
 
 // Quit when all windows are closed.
@@ -56,10 +62,14 @@ app.on('window-all-closed', () => {
   }
 });
 
-app.on('activate', () => {
+app.on('activate', async () => {
   // On macOS it's common to re-create a window in the app when the
   // dock icon is clicked and there are no other windows open.
-  if (BrowserWindow.getAllWindows().length === 0) createWindow();
+  if (BrowserWindow.getAllWindows().length === 0) {
+    for (const display of screen.getAllDisplays()) {
+      await createWindow(display);
+    }
+  }
 });
 
 // Exit cleanly on request from parent process in development mode.
@@ -79,8 +89,14 @@ if (isDevelopment) {
 
 // Custom events
 ipcMain.handle('is-mouse-active', async (_, isMouseActive) => {
-  if (!win) return;
-  win.setIgnoreMouseEvents(!isMouseActive);
+  if (!wins.length) return;
+  wins.forEach(w => w.setIgnoreMouseEvents(!isMouseActive));
+});
+ipcMain.handle('change-overlay-opacity', async (_, opacity: number) => {
+  wins.forEach(w => w.webContents.send('change-overlay-opacity', opacity));
+});
+ipcMain.handle('change-background-img', async (_, imgIdx: number) => {
+  wins.forEach(w => w.webContents.send('change-background-img', imgIdx));
 });
 ipcMain.handle('close-app', async () => {
   app.quit();
@@ -95,7 +111,7 @@ app.on('ready', async () => {
 
   // Register menu open/close hotkey
   globalShortcut.register('CommandOrControl+Alt+0', () => {
-    win!.webContents.send('menu-hotkey-pressed');
+    wins.forEach(w => w.webContents.send('menu-hotkey-pressed'));
   });
 
   if (isDevelopment && !process.env.IS_TEST) {
@@ -106,14 +122,18 @@ app.on('ready', async () => {
       console.error('Vue Devtools failed to install:', e.toString());
     }
   }
-  await createWindow();
+  for (const display of screen.getAllDisplays()) {
+    await createWindow(display);
+  }
   await autoUpdater.checkForUpdatesAndNotify();
 
   // Open links in default browser
-  win!.webContents.on('new-window', (e, url) => {
-    e.preventDefault();
-    shell.openExternal(url);
-  });
+  wins.forEach(w =>
+    w.webContents.on('new-window', (e, url) => {
+      e.preventDefault();
+      shell.openExternal(url);
+    }),
+  );
 });
 
 // Flags needed on linux to make the overlay transparent
@@ -123,6 +143,6 @@ if (process.platform === 'linux') {
   setInterval(() => {
     // Hotfix for linux that does not place the window always on top
     // Waiting for fix from electron
-    if (win) win.setAlwaysOnTop(true);
+    if (wins.length) wins.forEach(w => w.setAlwaysOnTop(true));
   }, 200);
 }
