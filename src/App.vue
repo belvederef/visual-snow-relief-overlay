@@ -6,7 +6,7 @@
     )
 
     vue-draggable-resizable#vue-draggable(
-      v-show="shouldDisplayMenu && isMenuOpen"
+      v-show="isPrimaryDisplay && isMenuOpen"
       ref="vue-draggable"
       :w="menu.w" 
       :h="menu.h"
@@ -68,7 +68,6 @@ import 'vue-slider-component/theme/antd.css';
 })
 export default class App extends Vue {
   /** UI */
-  shouldDisplayMenu = new URLSearchParams(window.location.search).get('monitor-idx') === '1';
   isMenuOpen = true;
   menu = {
     w: 600,
@@ -81,6 +80,7 @@ export default class App extends Vue {
     },
   };
 
+  isPrimaryDisplay = new URLSearchParams(window.location.search).get('monitor-idx') === '1';
   selectedImgIdx = 0;
   backgroundImages: Array<{ title: string; path: string }> = [
     {
@@ -126,9 +126,12 @@ export default class App extends Vue {
   }
 
   mounted() {
-    window.ipcRenderer.on('menu-hotkey-pressed', () => {
-      this.menuToggle();
-    });
+    if (this.isPrimaryDisplay) {
+      window.ipcRenderer.on('menu-hotkey-pressed', () => {
+        this.menuToggle();
+      });
+    }
+
     window.ipcRenderer.on('change-overlay-opacity', (_, opacity: number) => {
       this.opacity = opacity;
     });

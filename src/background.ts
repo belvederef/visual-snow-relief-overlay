@@ -127,13 +127,18 @@ app.on('ready', async () => {
   }
   await autoUpdater.checkForUpdatesAndNotify();
 
-  // Open links in default browser
-  wins.forEach(w =>
+  wins.forEach(w => {
+    // Open links in default browser
     w.webContents.on('new-window', (e, url) => {
       e.preventDefault();
       shell.openExternal(url);
-    }),
-  );
+    });
+
+    w.on('close', _ => {
+      // Remove window from list of windows
+      wins.splice(w.id - 1, 1);
+    });
+  });
 });
 
 // Flags needed on linux to make the overlay transparent
@@ -143,6 +148,6 @@ if (process.platform === 'linux') {
   setInterval(() => {
     // Hotfix for linux that does not place the window always on top
     // Waiting for fix from electron
-    if (wins.length) wins.forEach(w => w.setAlwaysOnTop(true));
-  }, 200);
+    wins.forEach(w => !w.isDestroyed() && w.setAlwaysOnTop(true));
+  }, 300);
 }
