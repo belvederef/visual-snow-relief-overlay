@@ -2,7 +2,7 @@
   #app
     img#background-img(
       :src="backgroundImages[selectedImgIdx].path"
-      :style="{ opacity }"
+      :style="{ opacity: cssOpacity }"
     )
 
     vue-draggable-resizable#vue-draggable(
@@ -41,11 +41,11 @@
             vue-slider.slider(
               :enable-cross="false"
               :value="opacity"
-              :min="0.05"
-              :max="0.5"
+              :min="1"
+              :max="16"
               :adsorb="true"
-              :interval="0.05"
-              :marks="value => ({ label: value })"
+              :interval="1"
+              :marks="true"
               @change="onOpacityChange"
             )
       div.info
@@ -104,7 +104,11 @@ export default class App extends Vue {
       path: '/assets/static3.gif',
     },
   ];
-  opacity = 0.1;
+
+  opacity = 8;
+  get cssOpacity() {
+    return this.opacity / 200;
+  }
 
   async menuToggle() {
     await window.ipcRenderer.invoke('is-mouse-active', !this.isMenuOpen);
