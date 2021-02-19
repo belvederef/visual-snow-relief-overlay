@@ -27,7 +27,6 @@ async function createWindow(display: Electron.Display) {
   const win = new BrowserWindow({
     transparent: true,
     frame: false,
-    alwaysOnTop: true,
     // @ts-ignore global var
     icon: path.join(__static, 'icon.png'),
     webPreferences: {
@@ -39,6 +38,8 @@ async function createWindow(display: Electron.Display) {
     },
   });
   win.setPosition(display.bounds.x, display.bounds.y);
+  win.setVisibleOnAllWorkspaces(true, { visibleOnFullScreen: true });
+  win.setAlwaysOnTop(true, 'screen-saver');
   win.maximize();
 
   if (process.env.WEBPACK_DEV_SERVER_URL) {
@@ -150,4 +151,8 @@ if (process.platform === 'linux') {
     // Waiting for fix from electron
     wins.forEach(w => !w.isDestroyed() && w.setAlwaysOnTop(true));
   }, 300);
+}
+
+if (process.platform === 'darwin') {
+  app.dock.hide();
 }
