@@ -41,7 +41,7 @@ async function createWindow(display: Electron.Display) {
   win.setVisibleOnAllWorkspaces(true, { visibleOnFullScreen: true });
   win.setAlwaysOnTop(true, 'screen-saver');
   win.setPosition(display.bounds.x, display.bounds.y);
-  win.maximize();
+  win.setSize(display.size.width, display.size.height);
 
   if (process.env.WEBPACK_DEV_SERVER_URL) {
     // Load the url of the dev server if in development mode
