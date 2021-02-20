@@ -38,6 +38,8 @@ async function createWindow(display: Electron.Display) {
       preload: path.join(app.getAppPath(), 'preload.js'),
     },
   });
+  win.setVisibleOnAllWorkspaces(true, { visibleOnFullScreen: true });
+  win.setAlwaysOnTop(true, 'screen-saver');
   win.setPosition(display.bounds.x, display.bounds.y);
   win.maximize();
 
