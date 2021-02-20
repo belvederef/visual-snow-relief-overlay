@@ -39,7 +39,8 @@ Once inside the container:
 yarn
 yarn electron:generate-icons
 yarn electron:publish -w # or yarn electron:build -w to build only
-chown -R `stat -c "%u:%g" ./dist_electron` ./dist_electron  # change ownership of the files created by the Docker container
+chown -R `stat -c "%u:%g" ./build` ./build  # change ownership of built files (e.g. icons) created in the Docker container
+chown -R `stat -c "%u:%g" ./dist_electron` ./dist_electron  # change ownership of the dist files created in the Docker container
 ```
 
 ### MacOS
