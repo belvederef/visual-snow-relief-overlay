@@ -27,7 +27,7 @@ async function createWindow(display: Electron.Display) {
   const win = new BrowserWindow({
     transparent: true,
     frame: false,
-    alwaysOnTop: true,
+    hasShadow: false,
     // @ts-ignore global var
     icon: path.join(__static, 'icon.png'),
     webPreferences: {
