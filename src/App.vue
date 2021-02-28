@@ -53,7 +53,6 @@
 </template>
 
 <script lang="ts">
-import { readFileSync, writeFileSync } from 'fs';
 import { Component, Vue } from 'vue-property-decorator';
 import ClickOutside from 'vue-click-outside';
 import VueSlider from 'vue-slider-component';
@@ -118,15 +117,11 @@ export default class App extends Vue {
       path: '/assets/static3.gif',
     },
   ];
-
-  //opacity = this.settings.opacity;
   get cssOpacity() {
     return this.settings.opacity / 200;
   }
-
   async menuToggle() {
     await window.ipcRenderer.invoke('is-mouse-active', !this.isMenuOpen);
-
     // Transition only for opening/closing
     const compClasses = (this.$refs['vue-draggable'] as Vue).$el.classList;
     compClasses.add('transition-active');
