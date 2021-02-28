@@ -53,7 +53,6 @@
 </template>
 
 <script lang="ts">
-import { readFileSync, writeFileSync } from 'fs';
 import { Component, Vue } from 'vue-property-decorator';
 import ClickOutside from 'vue-click-outside';
 import VueSlider from 'vue-slider-component';
@@ -119,7 +118,6 @@ export default class App extends Vue {
     },
   ];
 
-  //opacity = this.settings.opacity;
   get cssOpacity() {
     return this.settings.opacity / 200;
   }
