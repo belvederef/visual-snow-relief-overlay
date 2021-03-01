@@ -1,9 +1,9 @@
 name: CI Build
 
 on:
-  create:
+  push:
     tags:
-      - v*
+    - '*'
 
 jobs:
 
