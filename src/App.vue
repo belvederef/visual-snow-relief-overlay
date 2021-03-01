@@ -1,7 +1,7 @@
 <template lang="pug">
   #app
     img#background-img(
-      :src="backgroundImages[selectedImgIdx].path"
+      :src="backgroundImages[settings.selectedImgIdx].path"
       :style="{ opacity: cssOpacity }"
     )
 
@@ -33,14 +33,14 @@
               option(
                 v-for="(img, idx) in backgroundImages"
                 :value="idx"
-                :selected="idx === selectedImgIdx"
+                :selected="idx === settings.selectedImgIdx"
               ) {{ img.title }}
 
         .group
           label Opacity level
             vue-slider.slider(
               :enable-cross="false"
-              :value="opacity"
+              :value="settings.opacity"
               :min="1"
               :max="16"
               :adsorb="true"
@@ -79,9 +79,22 @@ export default class App extends Vue {
       return window.innerHeight / 2 - this.h / 2;
     },
   };
-
+  saveSettings = () => {
+    localStorage.setItem('settings', JSON.stringify(this.settings));
+  };
+  readSettings = () => {
+    const storedSettings = localStorage.getItem('settings');
+    if (!storedSettings) {
+      return {
+        opacity: 8,
+        selectedImgIdx: 0,
+      };
+    } else {
+      return JSON.parse(storedSettings);
+    }
+  };
+  settings = this.readSettings();
   isPrimaryDisplay = new URLSearchParams(window.location.search).get('monitor-idx') === '1';
-  selectedImgIdx = 0;
   backgroundImages: Array<{ title: string; path: string }> = [
     {
       title: 'Black & White 1',
@@ -105,9 +118,8 @@ export default class App extends Vue {
     },
   ];
 
-  opacity = 8;
   get cssOpacity() {
-    return this.opacity / 200;
+    return this.settings.opacity / 200;
   }
 
   async menuToggle() {
@@ -137,10 +149,12 @@ export default class App extends Vue {
     }
 
     window.ipcRenderer.on('change-overlay-opacity', (_, opacity: number) => {
-      this.opacity = opacity;
+      this.settings.opacity = opacity;
+      this.saveSettings();
     });
     window.ipcRenderer.on('change-background-img', (_, imgIdx: number) => {
-      this.selectedImgIdx = imgIdx;
+      this.settings.selectedImgIdx = imgIdx;
+      this.saveSettings();
     });
   }
 }
