@@ -83,14 +83,14 @@ export default class App extends Vue {
     localStorage.setItem('settings', JSON.stringify(this.settings));
   };
   readSettings = () => {
-    const local_settings = localStorage.getItem('settings');
-    if (!local_settings) {
+    const storedSettings = localStorage.getItem('settings');
+    if (!storedSettings) {
       return {
         opacity: 8,
         selectedImgIdx: 0,
       };
     } else {
-      return JSON.parse(local_settings);
+      return JSON.parse(storedSettings);
     }
   };
   settings = this.readSettings();
