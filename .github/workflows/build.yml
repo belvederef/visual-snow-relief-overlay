@@ -1,0 +1,44 @@
+name: CI Build
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+
+  build:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [macos-latest, ubuntu-latest, windows-latest]
+
+    steps:
+
+      - uses: actions/checkout@v2
+
+      - name: Setup NodeJs
+        uses: actions/setup-node@v2.1.5
+
+      - name: Install dependencies
+        run: yarn install
+
+      - name: Build
+        run: |
+          yarn electron:generate-icons
+          ./node_modules/.bin/vue-cli-service electron:build -p never
+          ls -R dist_electron
+  
+      - name: Upload Build
+        uses: actions/upload-artifact@v2
+        if: success()
+        with:
+          name: ${{ matrix.os }}-build
+          path: dist_electron/VS Relief Overlay*.*
+      
+      - name: Upload dist_electron
+        uses: actions/upload-artifact@v2
+        if: success()
+        with:
+          name: ${{ matrix.os }}-dist_electron
+          path: dist_electron
