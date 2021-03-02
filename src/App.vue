@@ -58,6 +58,11 @@ import ClickOutside from 'vue-click-outside';
 import VueSlider from 'vue-slider-component';
 import 'vue-slider-component/theme/antd.css';
 
+interface Settings {
+  opacity: number;
+  selectedImgIdx: number;
+}
+
 @Component({
   components: {
     VueSlider,
@@ -79,21 +84,6 @@ export default class App extends Vue {
       return window.innerHeight / 2 - this.h / 2;
     },
   };
-  saveSettings = () => {
-    localStorage.setItem('settings', JSON.stringify(this.settings));
-  };
-  readSettings = () => {
-    const storedSettings = localStorage.getItem('settings');
-    if (!storedSettings) {
-      return {
-        opacity: 8,
-        selectedImgIdx: 0,
-      };
-    } else {
-      return JSON.parse(storedSettings);
-    }
-  };
-  settings = this.readSettings();
   isPrimaryDisplay = new URLSearchParams(window.location.search).get('monitor-idx') === '1';
   backgroundImages: Array<{ title: string; path: string }> = [
     {
@@ -118,6 +108,22 @@ export default class App extends Vue {
     },
   ];
 
+  privateSettings = ((): Settings => {
+    // Load saved settings
+    const storedSettings = localStorage.getItem('settings');
+    if (storedSettings) return JSON.parse(storedSettings);
+    return {
+      opacity: 8,
+      selectedImgIdx: 0,
+    };
+  })();
+  get settings() {
+    return this.privateSettings;
+  }
+  set settings(settings) {
+    this.privateSettings = settings;
+    localStorage.setItem('settings', JSON.stringify(this.privateSettings));
+  }
   get cssOpacity() {
     return this.settings.opacity / 200;
   }
@@ -149,12 +155,10 @@ export default class App extends Vue {
     }
 
     window.ipcRenderer.on('change-overlay-opacity', (_, opacity: number) => {
-      this.settings.opacity = opacity;
-      this.saveSettings();
+      this.settings = { ...this.settings, opacity };
     });
     window.ipcRenderer.on('change-background-img', (_, imgIdx: number) => {
-      this.settings.selectedImgIdx = imgIdx;
-      this.saveSettings();
+      this.settings = { ...this.settings, selectedImgIdx: imgIdx };
     });
   }
 }
