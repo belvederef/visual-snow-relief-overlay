@@ -1,20 +1,17 @@
 name: CI Build
 
 on:
-  push:
-    tags:
-    - '*'
+  release:
+    types: [created]
 
 jobs:
-
-  build:
+  generate:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
         os: [macos-latest, ubuntu-latest, windows-latest]
 
     steps:
-
       - uses: actions/checkout@v2
 
       - name: Setup NodeJs
@@ -28,17 +25,22 @@ jobs:
           yarn electron:generate-icons
           ./node_modules/.bin/vue-cli-service electron:build -p never
           ls -R dist_electron
-  
-      - name: Upload Build
-        uses: actions/upload-artifact@v2
-        if: success()
+
+      - name: Upload artefacts
+        uses: skx/github-action-publish-binaries@master
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          name: ${{ matrix.os }}-build
-          path: dist_electron/VS Relief Overlay*.*
-      
-      - name: Upload dist_electron
-        uses: actions/upload-artifact@v2
-        if: success()
-        with:
-          name: ${{ matrix.os }}-dist_electron
-          path: dist_electron
+          args: 'dist_electron/latest* dist_electron/VS Relief Overlay*'
+      # - name: Upload Build
+      #   uses: actions/upload-artifact@v2
+      #   if: success()
+      #   with:
+      #     name: ${{ matrix.os }}-build
+      #     path: dist_electron/VS Relief Overlay*.*
+      # - name: Upload dist_electron
+      #   uses: actions/upload-artifact@v2
+      #   if: success()
+      #   with:
+      #     name: ${{ matrix.os }}-dist_electron
+      #     path: dist_electron
