@@ -36,6 +36,8 @@ The causes of visual snow syndrome are currently unknown. Some key features of t
 
 ## Download
 
+> ❗**UPDATE**: VS Relief Overlay is now available for Android at https://play.google.com/store/apps/details?id=eu.belvederef.vs_relief_overlay
+
 Download the latest package available for your operating system from the [release page](https://github.com/belvederef/visual-snow-relief-overlay/releases). Read below for notes on the versions provided.
 
 ### Windows
