@@ -13,8 +13,11 @@ import { createProtocol } from 'vue-cli-plugin-electron-builder/lib';
 import installExtension, { VUEJS_DEVTOOLS } from 'electron-devtools-installer';
 import { autoUpdater } from 'electron-updater';
 import * as path from 'path';
+import { ChangeKeyboardShortcut } from './types';
 
 const isDevelopment = process.env.NODE_ENV !== 'production';
+
+let oldKeyboardShortcut: string | null = null;
 
 // Scheme must be registered before the app is ready
 protocol.registerSchemesAsPrivileged([
@@ -27,6 +30,7 @@ async function createWindow(display: Electron.Display) {
   const win = new BrowserWindow({
     transparent: true,
     frame: false,
+    focusable: process.platform !== 'linux',
     hasShadow: false,
     // @ts-ignore global var
     icon: path.join(__static, 'icon.png'),
@@ -100,8 +104,26 @@ ipcMain.handle('change-overlay-opacity', async (_, opacity: number) => {
 ipcMain.handle('change-background-img', async (_, imgIdx: number) => {
   wins.forEach(w => w.webContents.send('change-background-img', imgIdx));
 });
+// Register menu open/close hotkey
+ipcMain.handle('change-keyboard-shortcut', async (_, keyBinds: ChangeKeyboardShortcut) => {
+  const { keyboardShortcutDisplay, keyboardShortcutElectron } = keyBinds;
+  if (oldKeyboardShortcut) globalShortcut.unregister(oldKeyboardShortcut);
+  globalShortcut.register(keyboardShortcutElectron, () => {
+    wins.forEach(w => w.webContents.send('menu-hotkey-pressed'));
+  });
+  oldKeyboardShortcut = keyboardShortcutElectron;
+  wins.forEach(w =>
+    w.webContents.send('change-keyboard-shortcut', {
+      keyboardShortcutElectron,
+      keyboardShortcutDisplay,
+    }),
+  );
+});
 ipcMain.handle('close-app', async () => {
   app.quit();
+});
+ipcMain.handle('log', async (_, loggable: any) => {
+  console.log(JSON.stringify(loggable));
 });
 
 // This method will be called when Electron has finished
@@ -110,11 +132,6 @@ ipcMain.handle('close-app', async () => {
 app.on('ready', async () => {
   // necessary to make the app transparent
   await new Promise(r => setTimeout(r, 500));
-
-  // Register menu open/close hotkey
-  globalShortcut.register('CommandOrControl+Alt+0', () => {
-    wins.forEach(w => w.webContents.send('menu-hotkey-pressed'));
-  });
 
   if (isDevelopment && !process.env.IS_TEST) {
     // Install Vue Devtools

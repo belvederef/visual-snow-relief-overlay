@@ -35,6 +35,10 @@
                 :value="idx"
                 :selected="idx === settings.selectedImgIdx"
               ) {{ img.title }}
+          br
+          br
+          keybind-input(@update-keybind="onKeyboardShortcutChange")
+
 
         .group
           label Opacity level
@@ -49,23 +53,29 @@
               @change="onOpacityChange"
             )
       div.info
-        p Press Ctrl+Alt+0 (or Cmd+Alt+0 on Mac) to open/close this menu at any time
+        p Press {{this.settings.keyboardShortcutDisplay}} to open/close this menu at any time
 </template>
 
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator';
 import ClickOutside from 'vue-click-outside';
 import VueSlider from 'vue-slider-component';
+import KeybindInput from '@/components/KeybindInput.vue';
+import { Settings, ChangeKeyboardShortcut } from '@/types';
+
 import 'vue-slider-component/theme/antd.css';
 
-interface Settings {
-  opacity: number;
-  selectedImgIdx: number;
-}
+const DEFAULT_SETTINGS: Settings = {
+  opacity: 8,
+  keyboardShortcutElectron: 'CommandOrControl+Alt+0',
+  keyboardShortcutDisplay: 'Ctrl+Alt+0',
+  selectedImgIdx: 0,
+};
 
 @Component({
   components: {
     VueSlider,
+    KeybindInput,
   },
   directives: {
     ClickOutside,
@@ -111,20 +121,19 @@ export default class App extends Vue {
   privateSettings = ((): Settings => {
     // Load saved settings
     const storedSettings = localStorage.getItem('settings');
-    if (storedSettings) return JSON.parse(storedSettings);
-    return {
-      opacity: 8,
-      selectedImgIdx: 0,
-    };
+    if (storedSettings) {
+      return { ...DEFAULT_SETTINGS, ...JSON.parse(storedSettings) };
+    }
+    return DEFAULT_SETTINGS;
   })();
-  get settings() {
+  get settings(): Settings {
     return this.privateSettings;
   }
   set settings(settings) {
     this.privateSettings = settings;
     localStorage.setItem('settings', JSON.stringify(this.privateSettings));
   }
-  get cssOpacity() {
+  get cssOpacity(): number {
     return this.settings.opacity / 200;
   }
 
@@ -137,14 +146,23 @@ export default class App extends Vue {
     this.isMenuOpen = !this.isMenuOpen;
     compClasses.remove('trasition-active');
   }
-  async onOpacityChange(opacity: number) {
-    await window.ipcRenderer.invoke('change-overlay-opacity', opacity);
+
+  onOpacityChange(opacity: number) {
+    window.ipcRenderer.invoke('change-overlay-opacity', opacity);
   }
-  async onBackgroundImgChange(event: { target: HTMLSelectElement }) {
-    await window.ipcRenderer.invoke('change-background-img', +event.target.value);
+
+  onBackgroundImgChange(event: { target: HTMLSelectElement }) {
+    window.ipcRenderer.invoke('change-background-img', +event.target.value);
   }
-  async closeWindow() {
-    await window.ipcRenderer.invoke('close-app');
+  logToConsole(loggable: unknown) {
+    window.ipcRenderer.invoke('log', JSON.stringify(loggable));
+  }
+  onKeyboardShortcutChange(keyBinds: ChangeKeyboardShortcut) {
+    window.ipcRenderer.invoke('change-keyboard-shortcut', keyBinds);
+  }
+
+  closeWindow() {
+    window.ipcRenderer.invoke('close-app');
   }
 
   mounted() {
@@ -152,14 +170,25 @@ export default class App extends Vue {
       window.ipcRenderer.on('menu-hotkey-pressed', () => {
         this.menuToggle();
       });
+      const { keyboardShortcutElectron, keyboardShortcutDisplay } = this.settings;
+      this.onKeyboardShortcutChange({ keyboardShortcutElectron, keyboardShortcutDisplay });
     }
 
     window.ipcRenderer.on('change-overlay-opacity', (_, opacity: number) => {
       this.settings = { ...this.settings, opacity };
     });
-    window.ipcRenderer.on('change-background-img', (_, imgIdx: number) => {
-      this.settings = { ...this.settings, selectedImgIdx: imgIdx };
+    window.ipcRenderer.on('change-background-img', (_, selectedImgIdx: number) => {
+      this.settings = { ...this.settings, selectedImgIdx };
     });
+    window.ipcRenderer.on(
+      'change-keyboard-shortcut',
+      (_, keyBinds: ChangeKeyboardShortcut) => {
+        this.settings = {
+          ...this.settings,
+          ...keyBinds,
+        };
+      },
+    );
   }
 }
 </script>
