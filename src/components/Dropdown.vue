@@ -13,12 +13,12 @@ div(style="margin-top: 5px;")
 
 <script lang="ts">
 import { BackgroundImage } from '@/types';
-import { Vue, Component, Prop, Model } from 'vue-property-decorator';
+import { Vue, Component, Prop } from 'vue-property-decorator';
 
 @Component
 export default class Dropdown extends Vue {
   @Prop(Array) readonly options!: BackgroundImage[];
-  @Model('change', { type: Number }) readonly selectedImageIdx!: number;
+  @Prop(Number) readonly selectedImageIdx!: number;
 
   get selectedImageIdxValue(): number {
     return this.selectedImageIdx;

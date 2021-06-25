@@ -6,7 +6,7 @@
     )
 
     vue-draggable-resizable#vue-draggable(
-      v-show="isPrimaryDisplay && isMenuOpen"
+      v-show="shouldShowScreen"
       ref="vue-draggable"
       :w="menu.w" 
       :h="menu.h"
@@ -43,6 +43,7 @@
               @change="onOpacityChange"
             )
       div.info
+        checkbox(label="See this screen the next time", :checked="settings.showScreenNextTime" @change="onShowNextTimeChange")
         button#register-keybind-button(@click="openRegisterKeybindDialog") Register new keybind for menu
         p Press {{this.settings.keyboardShortcutDisplay}} to open/close this menu at any time
 </template>
@@ -52,6 +53,8 @@ import { Component, Vue } from 'vue-property-decorator';
 import ClickOutside from 'vue-click-outside';
 import VueSlider from 'vue-slider-component';
 import Dropdown from '@/components/Dropdown.vue';
+import Checkbox from '@/components/Checkbox.vue';
+import backgroundImagesData from '@/data/backgrounds';
 import { Settings, ChangeKeyboardShortcut, BackgroundImage } from '@/types';
 
 import 'vue-slider-component/theme/antd.css';
@@ -61,11 +64,18 @@ const DEFAULT_SETTINGS: Settings = {
   keyboardShortcutElectron: 'CommandOrControl+Alt+0',
   keyboardShortcutDisplay: 'Ctrl+Alt+0',
   selectedImgIdx: 0,
+  showScreenNextTime: true,
+};
+
+const MENU_SIZE = {
+  WIDTH: 600,
+  HEIGHT: 500,
 };
 
 @Component({
   components: {
     VueSlider,
+    Checkbox,
     Dropdown,
   },
   directives: {
@@ -74,10 +84,12 @@ const DEFAULT_SETTINGS: Settings = {
 })
 export default class App extends Vue {
   /** UI */
-  isMenuOpen = true;
+  isMenuOpen = false;
+  showScreenThisTime = false;
+  wasHotkeyPressed = false;
   menu = {
-    w: 600,
-    h: 500,
+    w: MENU_SIZE.WIDTH,
+    h: MENU_SIZE.HEIGHT,
     get x() {
       return window.innerWidth / 2 - this.w / 2;
     },
@@ -86,46 +98,35 @@ export default class App extends Vue {
     },
   };
   isPrimaryDisplay = new URLSearchParams(window.location.search).get('monitor-idx') === '1';
-  backgroundImages: BackgroundImage[] = [
-    {
-      title: 'Black & White 1',
-      path: '/assets/static1.gif',
-    },
-    {
-      title: 'Black & White 2',
-      path: '/assets/static2.gif',
-    },
-    {
-      title: 'Black & White Pixelated',
-      path: '/assets/static4.gif',
-    },
-    {
-      title: 'Fine Dots',
-      path: '/assets/static6.gif',
-    },
-    {
-      title: 'Colour 1',
-      path: '/assets/static3.gif',
-    },
-  ];
+  backgroundImages = backgroundImagesData;
 
   privateSettings = ((): Settings => {
     // Load saved settings
     const storedSettings = localStorage.getItem('settings');
-    if (storedSettings) {
-      return { ...DEFAULT_SETTINGS, ...JSON.parse(storedSettings) };
-    }
-    return DEFAULT_SETTINGS;
+    return storedSettings
+      ? { ...DEFAULT_SETTINGS, ...JSON.parse(storedSettings) }
+      : DEFAULT_SETTINGS;
   })();
+
   get settings(): Settings {
     return this.privateSettings;
   }
+
   set settings(settings) {
     this.privateSettings = settings;
     localStorage.setItem('settings', JSON.stringify(this.privateSettings));
   }
+
   get cssOpacity(): number {
     return this.settings.opacity / 200;
+  }
+
+  get shouldShowScreen(): boolean {
+    return (
+      (this.showScreenThisTime || this.wasHotkeyPressed) &&
+      this.isMenuOpen &&
+      this.isPrimaryDisplay
+    );
   }
 
   async menuToggle() {
@@ -142,9 +143,14 @@ export default class App extends Vue {
     window.ipcRenderer.invoke('change-overlay-opacity', opacity);
   }
 
+  onShowNextTimeChange(showScreenNextTime: boolean) {
+    this.settings = { ...this.settings, showScreenNextTime };
+  }
+
   onBackgroundImgChange(idx: number) {
     window.ipcRenderer.invoke('change-background-img', idx);
   }
+
   logToConsole(loggable: unknown) {
     window.ipcRenderer.invoke('log', JSON.stringify(loggable));
   }
@@ -157,33 +163,69 @@ export default class App extends Vue {
     window.ipcRenderer.invoke('close-app');
   }
 
+  setUpHotkeyListener() {
+    window.ipcRenderer.on('menu-hotkey-pressed', () => {
+      // flag used for the showScreenThisTime routine
+      this.wasHotkeyPressed = true;
+      this.menuToggle();
+    });
+  }
+
+  /**
+   * Sets the hotkey for opening the menu
+   */
+  setUpHotkey() {
+    const { keyboardShortcutElectron, keyboardShortcutDisplay } = this.settings;
+    window.ipcRenderer.invoke('change-hotkey', {
+      keyboardShortcutElectron,
+      keyboardShortcutDisplay,
+    });
+  }
+
+  /**
+   * Checks if we show the config screen and ignores mouse events if we don't
+   */
+  initShowScreen() {
+    const { showScreenNextTime } = this.settings;
+
+    window.ipcRenderer.invoke('set-show-screen-this-time', showScreenNextTime);
+    if (showScreenNextTime) {
+      this.showScreenThisTime = true;
+      this.isMenuOpen = true;
+    }
+  }
+
+  handleSettingsChanges() {
+    const eventsToListenTo = {
+      opacity: 'change-overlay-opacity',
+      selectedImgIdx: 'change-background-img',
+    } as Record<keyof Settings, string>;
+
+    Object.entries(eventsToListenTo).forEach(([k, v]) => {
+      window.ipcRenderer.on(v, (_, setting) => {
+        this.settings = { ...this.settings, [k]: setting };
+      });
+    });
+
+    window.ipcRenderer.on('change-hotkey', (_, keyBinds: ChangeKeyboardShortcut) => {
+      this.settings = {
+        ...this.settings,
+        ...keyBinds,
+      };
+    });
+  }
+
   mounted() {
     if (this.isPrimaryDisplay) {
-      window.ipcRenderer.on('menu-hotkey-pressed', () => {
-        this.menuToggle();
-      });
-      const { keyboardShortcutElectron, keyboardShortcutDisplay } = this.settings;
-      window.ipcRenderer.invoke('change-keyboard-shortcut', {
-        keyboardShortcutElectron,
-        keyboardShortcutDisplay,
-      });
+      // called only once from this display so we
+      // know we have the good one set up
+      this.setUpHotkey();
+      this.setUpHotkeyListener();
+      this.initShowScreen();
     }
 
-    window.ipcRenderer.on('change-overlay-opacity', (_, opacity: number) => {
-      this.settings = { ...this.settings, opacity };
-    });
-    window.ipcRenderer.on('change-background-img', (_, selectedImgIdx: number) => {
-      this.settings = { ...this.settings, selectedImgIdx };
-    });
-    window.ipcRenderer.on(
-      'change-keyboard-shortcut',
-      (_, keyBinds: ChangeKeyboardShortcut) => {
-        this.settings = {
-          ...this.settings,
-          ...keyBinds,
-        };
-      },
-    );
+    // those need to be handled in every BrowserWindow
+    this.handleSettingsChanges();
   }
 }
 </script>
@@ -195,136 +237,5 @@ body {
 </style>
 
 <style lang="scss" scoped>
-$textColor: rgb(41, 41, 41);
-
-.button {
-  &__traffic {
-    color: white;
-    border: none;
-    width: 28px;
-    height: 28px;
-    font-weight: bold;
-    border-radius: 60px;
-    cursor: pointer;
-    transition: 0.4s;
-
-    &__close {
-      $closeBkg: rgb(226, 71, 71);
-      background-color: $closeBkg;
-
-      &:hover {
-        background-color: darken($closeBkg, 5%);
-      }
-    }
-
-    &__minimize {
-      $minimizeBkg: rgb(240, 200, 68);
-      background-color: $minimizeBkg;
-
-      &:hover {
-        background-color: darken($minimizeBkg, 5%);
-      }
-    }
-  }
-}
-
-.info {
-  width: inherit;
-  position: absolute;
-  bottom: 0;
-}
-
-.transition-active {
-  transition: ease-in-out 0.15s;
-}
-
-.drag-handle.menu-top-bar {
-  margin: 1px;
-  padding: 1px 7px 1px 1px;
-  letter-spacing: 4px;
-  font-weight: 700;
-  cursor: grabbing;
-  display: grid;
-  grid-template-columns: 50% 50%;
-
-  .left-aligned {
-    text-align: left;
-  }
-  .right-aligned {
-    text-align: right;
-  }
-
-  #support-button {
-    margin: 5px 0 0 5px;
-    height: 2.3em;
-  }
-  button {
-    cursor: pointer;
-    margin: 9px 3px;
-    font-size: 16px;
-  }
-}
-
-#vue-draggable {
-  background: white;
-  border: solid 1px #a3a3a3;
-  border-radius: 6px;
-  color: $textColor;
-
-  &:hover {
-    box-shadow: 0 0 11px rgba(33, 33, 33, 0.2);
-  }
-
-  #menu {
-    padding: 10px;
-    border-radius: 5px;
-    min-width: 500px;
-    font-weight: 700;
-
-    .group {
-      background: rgb(245, 245, 245);
-      padding: 30px;
-      border-bottom: solid 1px #a3a3a3;
-    }
-
-    .slider {
-      padding: 10px !important;
-    }
-  }
-}
-
-#background-img {
-  pointer-events: none;
-  position: absolute;
-  width: 100%;
-  height: 100%;
-  z-index: -1;
-}
-#app {
-  display: grid;
-  min-height: 100vh;
-  flex-direction: column;
-  font-family: 'Avenir', Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-  color: #2c3e50;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell,
-    'Open Sans', 'Helvetica Neue', sans-serif;
-  overflow: hidden;
-}
-
-$register-bkg: rgb(18, 79, 119);
-#register-keybind-button {
-  background-color: $register-bkg;
-  color: white;
-  border: 1px solid black;
-  padding: 6px 12px;
-  border-radius: 20px;
-  cursor: pointer;
-  transition: 0.4s;
-  &:hover {
-    background-color: darken($register-bkg, 5%);
-  }
-}
+@import '@/assets/styles/main.scss';
 </style>

@@ -11,7 +11,7 @@ import KeybindInput from './components/KeybindInput.vue';
 @Component({ components: { KeybindInput } })
 export default class App extends Vue {
   async handleUpdate(keyBinds: ChangeKeyboardShortcut) {
-    await window.ipcRenderer.invoke('change-keyboard-shortcut', keyBinds);
+    await window.ipcRenderer.invoke('change-hotkey', keyBinds);
     this.closeWindow()
   }
   closeWindow() {

@@ -1,0 +1,132 @@
+$textColor: rgb(41, 41, 41);
+
+.button {
+  &__traffic {
+    color: white;
+    border: none;
+    width: 28px;
+    height: 28px;
+    font-weight: bold;
+    border-radius: 60px;
+    cursor: pointer;
+    transition: 0.4s;
+
+    &__close {
+      $closeBkg: rgb(226, 71, 71);
+      background-color: $closeBkg;
+
+      &:hover {
+        background-color: darken($closeBkg, 5%);
+      }
+    }
+
+    &__minimize {
+      $minimizeBkg: rgb(240, 200, 68);
+      background-color: $minimizeBkg;
+
+      &:hover {
+        background-color: darken($minimizeBkg, 5%);
+      }
+    }
+  }
+}
+
+.info {
+  width: inherit;
+  position: absolute;
+  bottom: 0;
+}
+
+.transition-active {
+  transition: ease-in-out 0.15s;
+}
+
+.drag-handle.menu-top-bar {
+  margin: 1px;
+  padding: 1px 7px 1px 1px;
+  letter-spacing: 4px;
+  font-weight: 700;
+  cursor: grabbing;
+  display: grid;
+  grid-template-columns: 50% 50%;
+
+  .left-aligned {
+    text-align: left;
+  }
+  .right-aligned {
+    text-align: right;
+  }
+
+  #support-button {
+    margin: 5px 0 0 5px;
+    height: 2.3em;
+  }
+  button {
+    cursor: pointer;
+    margin: 9px 3px;
+    font-size: 16px;
+  }
+}
+
+#vue-draggable {
+  background: white;
+  border: solid 1px #a3a3a3;
+  border-radius: 6px;
+  color: $textColor;
+
+  &:hover {
+    box-shadow: 0 0 11px rgba(33, 33, 33, 0.2);
+  }
+
+  #menu {
+    padding: 10px;
+    border-radius: 5px;
+    min-width: 500px;
+    font-weight: 700;
+
+    .group {
+      background: rgb(245, 245, 245);
+      padding: 30px;
+      border-bottom: solid 1px #a3a3a3;
+    }
+
+    .slider {
+      padding: 10px !important;
+    }
+  }
+}
+
+#background-img {
+  pointer-events: none;
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  z-index: -1;
+}
+#app {
+  display: grid;
+  min-height: 100vh;
+  flex-direction: column;
+  font-family: 'Avenir', Helvetica, Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-align: center;
+  color: #2c3e50;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell,
+    'Open Sans', 'Helvetica Neue', sans-serif;
+  overflow: hidden;
+}
+
+$register-bkg: rgb(18, 79, 119);
+#register-keybind-button {
+  background-color: $register-bkg;
+  color: white;
+  border: 1px solid black;
+  padding: 6px 12px;
+  border-radius: 20px;
+  cursor: pointer;
+  transition: 0.4s;
+  &:hover {
+    background-color: darken($register-bkg, 5%);
+  }
+}

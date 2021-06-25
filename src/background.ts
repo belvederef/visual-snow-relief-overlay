@@ -20,29 +20,29 @@ const isDevelopment = process.env.NODE_ENV !== 'production';
 let oldKeyboardShortcut: string | null = null;
 let keyBindDialog: BrowserWindow | null = null;
 
-// Use pluginOptions.nodeIntegration, leave this alone
-// See nklayman.github.io/vue-cli-plugin-electron-builder/guide/security.html#node-integration for more info
-const nodeIntegration = (process.env.ELECTRON_NODE_INTEGRATION as unknown) as boolean;
-
 // Scheme must be registered before the app is ready
 protocol.registerSchemesAsPrivileged([
   { scheme: 'app', privileges: { secure: true, standard: true } },
 ]);
 
+// Use pluginOptions.nodeIntegration, leave this alone
+// See nklayman.github.io/vue-cli-plugin-electron-builder/guide/security.html#node-integration for more info
+const nodeIntegration = (process.env.ELECTRON_NODE_INTEGRATION as unknown) as boolean;
 const preloadPath = path.join(app.getAppPath(), 'preload.js');
 
 const loadWinUrl = async (win: BrowserWindow, path: string) => {
-  if (process.env.WEBPACK_DEV_SERVER_URL) {
-    // await win.loadURL(`${process.env.WEBPACK_DEV_SERVER_URL}?monitor-idx=${wins.length + 1}`);
-    await win.loadURL(`${process.env.WEBPACK_DEV_SERVER_URL}${path}`);
-  } else {
-    createProtocol('app');
-    win.loadURL(`app://./${path}`);
-  }
+  const devServer = process.env.WEBPACK_DEV_SERVER_URL;
+  const baseScheme = devServer || 'app://./';
+  if (!devServer) createProtocol('app');
+  await win.loadURL(`${baseScheme}${path}`);
 };
 
-const wins: Array<BrowserWindow> = [];
-async function createWindow(display: Electron.Display) {
+const wins: BrowserWindow[] = [];
+
+const createWindow = async (
+  display: Electron.Display,
+  onReadyCb: (w: BrowserWindow) => Promise<void> = async () => {},
+) => {
   // Create the browser window.
   const win = new BrowserWindow({
     transparent: true,
@@ -56,15 +56,23 @@ async function createWindow(display: Electron.Display) {
       // contextIsolation: true,
       preload: preloadPath,
     },
+    show: false,
   });
   win.setVisibleOnAllWorkspaces(true, { visibleOnFullScreen: true });
   win.setAlwaysOnTop(true, 'screen-saver');
   win.setPosition(display.bounds.x, display.bounds.y);
   win.setSize(display.size.width, display.size.height);
-
+  win.once('ready-to-show', async () => {
+    await onReadyCb(win);
+    win.show();
+  });
   await loadWinUrl(win, `index.html?monitor-idx=${wins.length + 1}`);
   wins.push(win);
-}
+};
+
+const setIgnoreMouseEvents = (ignore: boolean = true) => {
+  wins.forEach(w => w.setIgnoreMouseEvents(ignore));
+};
 
 const createKeybindDialog = async () => {
   if (keyBindDialog) return;
@@ -80,17 +88,18 @@ const createKeybindDialog = async () => {
     },
   });
   const { width: primaryDisplayWidth } = screen.getPrimaryDisplay().bounds;
+  // We do this for Linux, because it can't be on top so we kinda make sure it's not below
   keyBindDialog.setPosition(primaryDisplayWidth - keyBindDialog.getSize()[0] - 100, 100);
   // it's on top but it can't be on top of a non-focusable window in Linux
   keyBindDialog.setAlwaysOnTop(true, 'screen-saver');
   keyBindDialog.removeMenu();
-  keyBindDialog.on('ready-to-show', () => {
+  keyBindDialog.once('ready-to-show', () => {
     keyBindDialog!.focus();
     keyBindDialog!.show();
-    wins.forEach(w => w.setIgnoreMouseEvents(true));
+    setIgnoreMouseEvents(true);
   });
-  keyBindDialog.on('close', () => {
-    wins.forEach(w => w.setIgnoreMouseEvents(false));
+  keyBindDialog.once('close', () => {
+    setIgnoreMouseEvents(false);
     keyBindDialog = null;
   });
   loadWinUrl(keyBindDialog, 'keybind_dialog.html');
@@ -130,21 +139,28 @@ if (isDevelopment) {
   }
 }
 
-// Custom events
+/**
+ * Custom events
+ */
 ipcMain.handle('is-mouse-active', async (_, isMouseActive: boolean) => {
   // If there's a keyBindDialog on the screen, we can't toggle,
   // otherwise mouse events reset and it can't be clicked
   if (!wins.length || keyBindDialog) return;
   wins.forEach(w => w.setIgnoreMouseEvents(!isMouseActive));
 });
-ipcMain.handle('change-overlay-opacity', async (_, opacity: number) => {
+ipcMain.handle('change-overlay-opacity', (_, opacity: number) => {
   wins.forEach(w => w.webContents.send('change-overlay-opacity', opacity));
 });
-ipcMain.handle('change-background-img', async (_, imgIdx: number) => {
+ipcMain.handle('change-background-img', (_, imgIdx: number) => {
   wins.forEach(w => w.webContents.send('change-background-img', imgIdx));
 });
-// Register menu open/close hotkey
-ipcMain.handle('change-keyboard-shortcut', async (_, keyBinds: ChangeKeyboardShortcut) => {
+
+/**
+ * Register menu open/close hotkey
+ * We don't need to wait for all the windows as this is
+ * invoked from main screen only
+ */
+ipcMain.handle('change-hotkey', (_, keyBinds: ChangeKeyboardShortcut) => {
   const { keyboardShortcutDisplay, keyboardShortcutElectron } = keyBinds;
   if (oldKeyboardShortcut) globalShortcut.unregister(oldKeyboardShortcut);
   globalShortcut.register(keyboardShortcutElectron, () => {
@@ -152,26 +168,43 @@ ipcMain.handle('change-keyboard-shortcut', async (_, keyBinds: ChangeKeyboardSho
   });
   oldKeyboardShortcut = keyboardShortcutElectron;
   wins.forEach(w =>
-    w.webContents.send('change-keyboard-shortcut', {
+    w.webContents.send('change-hotkey', {
       keyboardShortcutElectron,
       keyboardShortcutDisplay,
     }),
   );
 });
-ipcMain.handle('close-app', async () => {
+ipcMain.handle('close-app', () => {
   app.quit();
 });
 ipcMain.handle('open-keybind-dialog', createKeybindDialog);
 ipcMain.handle('close-keybind-dialog', () => {
   if (keyBindDialog) keyBindDialog.close();
 });
-ipcMain.handle('log', async (_, loggable: any) => {
+
+/**
+ * Helper method called from frontend to log to the
+ * terminal instead of enabling dev tools
+ */
+ipcMain.handle('log', (_, loggable: any) => {
   console.log(JSON.stringify(loggable));
 });
 
-// This method will be called when Electron has finished
-// initialization and is ready to create browser windows.
-// Some APIs can only be used after this event occurs.
+/**
+ * The listener is set up before the windows are loaded as promises
+ * are lazy, so we won't miss it
+ */
+const checkIfShouldShowScreen: Promise<boolean> = new Promise(resolve => {
+  ipcMain.handle('set-show-screen-this-time', (_, shouldShowScreenThisTime: boolean) => {
+    resolve(shouldShowScreenThisTime);
+  });
+});
+
+/**
+ * This method will be called when Electron has finished
+ * initialization and is ready to create browser windows.
+ * Some APIs can only be used after this event occurs.
+ */
 app.on('ready', async () => {
   // necessary to make the app transparent
   await new Promise(r => setTimeout(r, 500));
@@ -187,6 +220,12 @@ app.on('ready', async () => {
   for (const display of screen.getAllDisplays()) {
     await createWindow(display);
   }
+
+  // We need to check this after we create all the windows
+  // So the event is passed to all of them.
+  // We do this to allow input when the window is not opened first
+  if (!(await checkIfShouldShowScreen)) setIgnoreMouseEvents(true);
+
   await autoUpdater.checkForUpdatesAndNotify();
 
   wins.forEach(w => {

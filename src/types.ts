@@ -3,6 +3,7 @@ export interface Settings {
   selectedImgIdx: number;
   keyboardShortcutElectron: string;
   keyboardShortcutDisplay: string;
+  showScreenNextTime: boolean;
 }
 
 export type ChangeKeyboardShortcut = Pick<
