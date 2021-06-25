@@ -9,3 +9,8 @@ export type ChangeKeyboardShortcut = Pick<
   Settings,
   'keyboardShortcutElectron' | 'keyboardShortcutDisplay'
 >;
+
+export interface BackgroundImage {
+  title: string;
+  path: string;
+}

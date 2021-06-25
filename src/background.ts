@@ -18,11 +18,28 @@ import { ChangeKeyboardShortcut } from './types';
 const isDevelopment = process.env.NODE_ENV !== 'production';
 
 let oldKeyboardShortcut: string | null = null;
+let keyBindDialog: BrowserWindow | null = null;
+
+// Use pluginOptions.nodeIntegration, leave this alone
+// See nklayman.github.io/vue-cli-plugin-electron-builder/guide/security.html#node-integration for more info
+const nodeIntegration = (process.env.ELECTRON_NODE_INTEGRATION as unknown) as boolean;
 
 // Scheme must be registered before the app is ready
 protocol.registerSchemesAsPrivileged([
   { scheme: 'app', privileges: { secure: true, standard: true } },
 ]);
+
+const preloadPath = path.join(app.getAppPath(), 'preload.js');
+
+const loadWinUrl = async (win: BrowserWindow, path: string) => {
+  if (process.env.WEBPACK_DEV_SERVER_URL) {
+    // await win.loadURL(`${process.env.WEBPACK_DEV_SERVER_URL}?monitor-idx=${wins.length + 1}`);
+    await win.loadURL(`${process.env.WEBPACK_DEV_SERVER_URL}${path}`);
+  } else {
+    createProtocol('app');
+    win.loadURL(`app://./${path}`);
+  }
+};
 
 const wins: Array<BrowserWindow> = [];
 async function createWindow(display: Electron.Display) {
@@ -35,11 +52,9 @@ async function createWindow(display: Electron.Display) {
     // @ts-ignore global var
     icon: path.join(__static, 'icon.png'),
     webPreferences: {
-      // Use pluginOptions.nodeIntegration, leave this alone
-      // See nklayman.github.io/vue-cli-plugin-electron-builder/guide/security.html#node-integration for more info
-      nodeIntegration: (process.env.ELECTRON_NODE_INTEGRATION as unknown) as boolean,
+      nodeIntegration,
       // contextIsolation: true,
-      preload: path.join(app.getAppPath(), 'preload.js'),
+      preload: preloadPath,
     },
   });
   win.setVisibleOnAllWorkspaces(true, { visibleOnFullScreen: true });
@@ -47,17 +62,39 @@ async function createWindow(display: Electron.Display) {
   win.setPosition(display.bounds.x, display.bounds.y);
   win.setSize(display.size.width, display.size.height);
 
-  if (process.env.WEBPACK_DEV_SERVER_URL) {
-    // Load the url of the dev server if in development mode
-    await win.loadURL(`${process.env.WEBPACK_DEV_SERVER_URL}?monitor-idx=${wins.length + 1}`);
-    // if (!process.env.IS_TEST) win.webContents.openDevTools();
-  } else {
-    createProtocol('app');
-    // Load the index.html when not in development
-    win.loadURL(`app://./index.html?monitor-idx=${wins.length + 1}`);
-  }
+  await loadWinUrl(win, `index.html?monitor-idx=${wins.length + 1}`);
   wins.push(win);
 }
+
+const createKeybindDialog = async () => {
+  if (keyBindDialog) return;
+  const primaryWindow = wins[0];
+  keyBindDialog = new BrowserWindow({
+    width: 300,
+    height: 150,
+    modal: true,
+    parent: primaryWindow,
+    webPreferences: {
+      nodeIntegration,
+      preload: preloadPath,
+    },
+  });
+  const { width: primaryDisplayWidth } = screen.getPrimaryDisplay().bounds;
+  keyBindDialog.setPosition(primaryDisplayWidth - keyBindDialog.getSize()[0] - 100, 100);
+  // it's on top but it can't be on top of a non-focusable window in Linux
+  keyBindDialog.setAlwaysOnTop(true, 'screen-saver');
+  keyBindDialog.removeMenu();
+  keyBindDialog.on('ready-to-show', () => {
+    keyBindDialog!.focus();
+    keyBindDialog!.show();
+    wins.forEach(w => w.setIgnoreMouseEvents(true));
+  });
+  keyBindDialog.on('close', () => {
+    wins.forEach(w => w.setIgnoreMouseEvents(false));
+    keyBindDialog = null;
+  });
+  loadWinUrl(keyBindDialog, 'keybind_dialog.html');
+};
 
 // Quit when all windows are closed.
 app.on('window-all-closed', () => {
@@ -94,8 +131,10 @@ if (isDevelopment) {
 }
 
 // Custom events
-ipcMain.handle('is-mouse-active', async (_, isMouseActive) => {
-  if (!wins.length) return;
+ipcMain.handle('is-mouse-active', async (_, isMouseActive: boolean) => {
+  // If there's a keyBindDialog on the screen, we can't toggle,
+  // otherwise mouse events reset and it can't be clicked
+  if (!wins.length || keyBindDialog) return;
   wins.forEach(w => w.setIgnoreMouseEvents(!isMouseActive));
 });
 ipcMain.handle('change-overlay-opacity', async (_, opacity: number) => {
@@ -121,6 +160,10 @@ ipcMain.handle('change-keyboard-shortcut', async (_, keyBinds: ChangeKeyboardSho
 });
 ipcMain.handle('close-app', async () => {
   app.quit();
+});
+ipcMain.handle('open-keybind-dialog', createKeybindDialog);
+ipcMain.handle('close-keybind-dialog', () => {
+  if (keyBindDialog) keyBindDialog.close();
 });
 ipcMain.handle('log', async (_, loggable: any) => {
   console.log(JSON.stringify(loggable));
@@ -164,9 +207,4 @@ app.on('ready', async () => {
 if (process.platform === 'linux') {
   app.commandLine.appendSwitch('enable-transparent-visuals');
   app.commandLine.appendSwitch('disable-gpu');
-  setInterval(() => {
-    // Hotfix for linux that does not place the window always on top
-    // Waiting for fix from electron
-    wins.forEach(w => !w.isDestroyed() && w.setAlwaysOnTop(true));
-  }, 300);
 }

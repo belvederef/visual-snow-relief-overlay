@@ -23,23 +23,13 @@
           )
             img#support-button(src="/assets/support.png")
         .right-aligned
-          button(@click="menuToggle()") –
-          button(@click="closeWindow()") x
+          button.button__traffic.button__traffic__minimize(@click="menuToggle()") –
+          button.button__traffic.button__traffic__close(@click="closeWindow()") x
       div#menu
         .group
-          label Image
+          label Choose background
             br
-            select(@change="onBackgroundImgChange")
-              option(
-                v-for="(img, idx) in backgroundImages"
-                :value="idx"
-                :selected="idx === settings.selectedImgIdx"
-              ) {{ img.title }}
-          br
-          br
-          keybind-input(@update-keybind="onKeyboardShortcutChange")
-
-
+            dropdown(@change="onBackgroundImgChange" :options="backgroundImages" :selectedImageIdx="settings.selectedImgIdx")
         .group
           label Opacity level
             vue-slider.slider(
@@ -53,6 +43,7 @@
               @change="onOpacityChange"
             )
       div.info
+        button#register-keybind-button(@click="openRegisterKeybindDialog") Register new keybind for menu
         p Press {{this.settings.keyboardShortcutDisplay}} to open/close this menu at any time
 </template>
 
@@ -60,8 +51,8 @@
 import { Component, Vue } from 'vue-property-decorator';
 import ClickOutside from 'vue-click-outside';
 import VueSlider from 'vue-slider-component';
-import KeybindInput from '@/components/KeybindInput.vue';
-import { Settings, ChangeKeyboardShortcut } from '@/types';
+import Dropdown from '@/components/Dropdown.vue';
+import { Settings, ChangeKeyboardShortcut, BackgroundImage } from '@/types';
 
 import 'vue-slider-component/theme/antd.css';
 
@@ -75,7 +66,7 @@ const DEFAULT_SETTINGS: Settings = {
 @Component({
   components: {
     VueSlider,
-    KeybindInput,
+    Dropdown,
   },
   directives: {
     ClickOutside,
@@ -95,7 +86,7 @@ export default class App extends Vue {
     },
   };
   isPrimaryDisplay = new URLSearchParams(window.location.search).get('monitor-idx') === '1';
-  backgroundImages: Array<{ title: string; path: string }> = [
+  backgroundImages: BackgroundImage[] = [
     {
       title: 'Black & White 1',
       path: '/assets/static1.gif',
@@ -151,14 +142,15 @@ export default class App extends Vue {
     window.ipcRenderer.invoke('change-overlay-opacity', opacity);
   }
 
-  onBackgroundImgChange(event: { target: HTMLSelectElement }) {
-    window.ipcRenderer.invoke('change-background-img', +event.target.value);
+  onBackgroundImgChange(idx: number) {
+    window.ipcRenderer.invoke('change-background-img', idx);
   }
   logToConsole(loggable: unknown) {
     window.ipcRenderer.invoke('log', JSON.stringify(loggable));
   }
-  onKeyboardShortcutChange(keyBinds: ChangeKeyboardShortcut) {
-    window.ipcRenderer.invoke('change-keyboard-shortcut', keyBinds);
+
+  openRegisterKeybindDialog() {
+    window.ipcRenderer.invoke('open-keybind-dialog');
   }
 
   closeWindow() {
@@ -171,7 +163,10 @@ export default class App extends Vue {
         this.menuToggle();
       });
       const { keyboardShortcutElectron, keyboardShortcutDisplay } = this.settings;
-      this.onKeyboardShortcutChange({ keyboardShortcutElectron, keyboardShortcutDisplay });
+      window.ipcRenderer.invoke('change-keyboard-shortcut', {
+        keyboardShortcutElectron,
+        keyboardShortcutDisplay,
+      });
     }
 
     window.ipcRenderer.on('change-overlay-opacity', (_, opacity: number) => {
@@ -200,7 +195,38 @@ body {
 </style>
 
 <style lang="scss" scoped>
-$colour: rgb(41, 41, 41);
+$textColor: rgb(41, 41, 41);
+
+.button {
+  &__traffic {
+    color: white;
+    border: none;
+    width: 28px;
+    height: 28px;
+    font-weight: bold;
+    border-radius: 60px;
+    cursor: pointer;
+    transition: 0.4s;
+
+    &__close {
+      $closeBkg: rgb(226, 71, 71);
+      background-color: $closeBkg;
+
+      &:hover {
+        background-color: darken($closeBkg, 5%);
+      }
+    }
+
+    &__minimize {
+      $minimizeBkg: rgb(240, 200, 68);
+      background-color: $minimizeBkg;
+
+      &:hover {
+        background-color: darken($minimizeBkg, 5%);
+      }
+    }
+  }
+}
 
 .info {
   width: inherit;
@@ -229,7 +255,7 @@ $colour: rgb(41, 41, 41);
   }
 
   #support-button {
-    margin: 3px 0 0 3px;
+    margin: 5px 0 0 5px;
     height: 2.3em;
   }
   button {
@@ -243,7 +269,7 @@ $colour: rgb(41, 41, 41);
   background: white;
   border: solid 1px #a3a3a3;
   border-radius: 6px;
-  color: $colour;
+  color: $textColor;
 
   &:hover {
     box-shadow: 0 0 11px rgba(33, 33, 33, 0.2);
@@ -286,5 +312,19 @@ $colour: rgb(41, 41, 41);
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell,
     'Open Sans', 'Helvetica Neue', sans-serif;
   overflow: hidden;
+}
+
+$register-bkg: rgb(18, 79, 119);
+#register-keybind-button {
+  background-color: $register-bkg;
+  color: white;
+  border: 1px solid black;
+  padding: 6px 12px;
+  border-radius: 20px;
+  cursor: pointer;
+  transition: 0.4s;
+  &:hover {
+    background-color: darken($register-bkg, 5%);
+  }
 }
 </style>

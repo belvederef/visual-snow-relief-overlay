@@ -1,46 +1,47 @@
 <template lang="pug">
   div
-    button(v-if="!isRegisteringShortcut" @click="isRegisteringShortcut = true") Register new keyboard shortcut
-    div(v-else)
-      button.option(@click="updateKeybind") Save
-      button.option(@click="resetKeybind") Reset
-      button.option(@click="isRegisteringShortcut = false" style="margin-right: 0") Cancel
-      br
+    div.button-container
+      button.option.option__save(@click="updateKeybind") Save
+      button.option.option__cancel(@click="closeWindow" style="margin-right: 0") Cancel
+    div(v-if="!currentPressedKeycodes.length")
+      <p style="margin: 0; text-align: center; margin: 10px 0;">Waiting for input...</p>
       div.loader(v-if="!currentPressedKeycodes.length")
-      p(v-else, style="margin-top: 5px;") {{keyCodesDisplay}}
+    p.key-bind(v-else, style="margin-top: 20px; font-family: Roboto") {{keyCodesDisplay}}
 </template>
 
 <script lang="ts">
 import hotkeys from 'hotkeys-js';
 import { getKeycodeKeyName } from '@/utils';
-import { Component, Emit, Watch } from 'vue-property-decorator';
+import { Component, Emit } from 'vue-property-decorator';
 import Vue from 'vue';
 import { ChangeKeyboardShortcut } from '@/types';
+
 @Component
 export default class KeybindInput extends Vue {
-  isRegisteringShortcut = false;
   currentPressedKeycodes: number[] = [];
 
   get keyCodesDisplay(): string {
     return this.getKeyBind(true);
   }
 
-  getKeyBind(isDisplay: boolean) {
-    return this.currentPressedKeycodes.map(kc => getKeycodeKeyName(kc, isDisplay)).join('+');
+  mounted() {
+    hotkeys('*', { keyup: false }, () => {
+      this.currentPressedKeycodes = hotkeys.getPressedKeyCodes();
+    });
   }
 
-  @Watch('isRegisteringShortcut')
-  onIsRegisteringShortcutChanged(newVal: boolean) {
-    if (!newVal) hotkeys.unbind('*');
-    else
-      hotkeys('*', { keyup: false }, (e, handler) => {
-        this.currentPressedKeycodes = hotkeys.getPressedKeyCodes();
-      });
+  @Emit()
+  closeWindow() {}
+
+  getKeyBind(isDisplay: boolean) {
+    const joinKey = isDisplay ? ' + ' : '+';
+    return this.currentPressedKeycodes
+      .map(kc => getKeycodeKeyName(kc, isDisplay))
+      .join(joinKey);
   }
 
   @Emit()
   updateKeybind(): ChangeKeyboardShortcut {
-    this.isRegisteringShortcut = false;
     const keyBinds = {
       keyboardShortcutElectron: this.getKeyBind(false),
       keyboardShortcutDisplay: this.getKeyBind(true),
@@ -55,7 +56,8 @@ export default class KeybindInput extends Vue {
 }
 </script>
 
-<style>
+<style lang="scss">
+/** Credits https://projects.lukehaas.me/css-loaders/ */
 .loader,
 .loader:after {
   border-radius: 50%;
@@ -63,7 +65,7 @@ export default class KeybindInput extends Vue {
   height: 10em;
 }
 .loader {
-  margin: 10px auto;
+  margin: 0 auto;
   font-size: 3px;
   position: relative;
   text-indent: -9999em;
@@ -99,6 +101,42 @@ export default class KeybindInput extends Vue {
 }
 
 .option {
-  margin-right: 5px;
+  margin: 3px;
+  margin-bottom: 0;
+  width: 100%;
+  transition-duration: 0.4s;
+  background-color: white;
+  color: black;
+  font-size: 13px;
+  padding: 6px 12px;
+
+  &:hover {
+    color: white;
+  }
+
+  &__save {
+    &:hover {
+      background-color: #4caf50;
+    }
+    border: 2px solid #4caf50;
+  }
+
+  &__cancel {
+    &:hover {
+      background-color: #a8230c;
+    }
+    border: 2px solid #a8230c;
+  }
+}
+
+.key-bind {
+  text-align: center;
+  font-weight: bold;
+  font-size: 25px;
+}
+
+.button-container {
+  display: flex;
+  flex-direction: row;
 }
 </style>
