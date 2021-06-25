@@ -29,7 +29,16 @@
         .group
           label Choose background
             br
-            dropdown(@change="onBackgroundImgChange" :options="backgroundImages" :selectedImageIdx="settings.selectedImgIdx")
+            dropdown(@change="onBackgroundImgChange" :options="backgroundImages" :selected-idx="settings.selectedImgIdx")
+          br
+          div(style="display: flex; flex-align: row; justify-content: space-between;")
+            label Choose interval
+              br
+              dropdown(@change="onIntervalChange" :options="intervals" :selected-idx="settings.selectedIntervalIdx")
+            br
+            label Choose pause
+              br
+              dropdown(@change="onPauseChange" :options="pauses" :selected-idx="settings.selectedPauseIdx" :is-disabled="settings.selectedIntervalIdx === 0")
         .group
           label Opacity level
             vue-slider.slider(
@@ -55,7 +64,7 @@ import VueSlider from 'vue-slider-component';
 import Dropdown from '@/components/Dropdown.vue';
 import Checkbox from '@/components/Checkbox.vue';
 import backgroundImagesData from '@/data/backgrounds';
-import { Settings, ChangeKeyboardShortcut, BackgroundImage } from '@/types';
+import { INTERVALS, PAUSES } from '@/data/timer';
 
 import 'vue-slider-component/theme/antd.css';
 
@@ -64,12 +73,14 @@ const DEFAULT_SETTINGS: Settings = {
   keyboardShortcutElectron: 'CommandOrControl+Alt+0',
   keyboardShortcutDisplay: 'Ctrl+Alt+0',
   selectedImgIdx: 0,
+  selectedPauseIdx: 0,
+  selectedIntervalIdx: 0,
   showScreenNextTime: true,
 };
 
 const MENU_SIZE = {
   WIDTH: 600,
-  HEIGHT: 500,
+  HEIGHT: 550,
 };
 
 @Component({
@@ -84,6 +95,8 @@ const MENU_SIZE = {
 })
 export default class App extends Vue {
   /** UI */
+  activeTimeout: NodeJS.Timer | null = null;
+  pauseTimeout: NodeJS.Timer | null = null;
   isMenuOpen = false;
   showScreenThisTime = false;
   wasHotkeyPressed = false;
@@ -99,6 +112,9 @@ export default class App extends Vue {
   };
   isPrimaryDisplay = new URLSearchParams(window.location.search).get('monitor-idx') === '1';
   backgroundImages = backgroundImagesData;
+  isPaused = false;
+  intervals = INTERVALS;
+  pauses = PAUSES;
 
   privateSettings = ((): Settings => {
     // Load saved settings
@@ -112,13 +128,21 @@ export default class App extends Vue {
     return this.privateSettings;
   }
 
+  get activeTimeMs(): number {
+    return this.intervals[this.settings.selectedIntervalIdx].value * 60 * 1000;
+  }
+
+  get pauseTimeMs(): number {
+    return this.pauses[this.settings.selectedPauseIdx].value * 60 * 1000;
+  }
+
   set settings(settings) {
     this.privateSettings = settings;
     localStorage.setItem('settings', JSON.stringify(this.privateSettings));
   }
 
   get cssOpacity(): number {
-    return this.settings.opacity / 200;
+    return this.isPaused ? 0 : this.settings.opacity / 200;
   }
 
   get shouldShowScreen(): boolean {
@@ -137,6 +161,14 @@ export default class App extends Vue {
     compClasses.add('transition-active');
     this.isMenuOpen = !this.isMenuOpen;
     compClasses.remove('trasition-active');
+  }
+
+  onIntervalChange(intervalIdx: number) {
+    window.ipcRenderer.invoke('change-interval', intervalIdx);
+  }
+
+  onPauseChange(pauseIdx: number) {
+    window.ipcRenderer.invoke('change-pause', pauseIdx);
   }
 
   onOpacityChange(opacity: number) {
@@ -161,6 +193,10 @@ export default class App extends Vue {
 
   closeWindow() {
     window.ipcRenderer.invoke('close-app');
+  }
+
+  updateSettings(params: Partial<Settings>) {
+    this.settings = { ...this.settings, ...params };
   }
 
   setUpHotkeyListener() {
@@ -195,23 +231,53 @@ export default class App extends Vue {
     }
   }
 
+  startTimers() {
+    const startPauseTimer = () => {
+      this.pauseTimeout = setTimeout(() => {
+        this.isPaused = false;
+        startActiveTimer();
+      }, this.pauseTimeMs);
+    };
+    const startActiveTimer = () => {
+      if (!this.activeTimeMs) return;
+      this.activeTimeout = setTimeout(() => {
+        this.isPaused = true;
+        startPauseTimer();
+      }, this.activeTimeMs);
+    };
+    if (this.activeTimeout) clearTimeout(this.activeTimeout);
+    if (this.pauseTimeout) clearTimeout(this.pauseTimeout);
+    this.isPaused = false;
+    startActiveTimer();
+  }
+
   handleSettingsChanges() {
     const eventsToListenTo = {
       opacity: 'change-overlay-opacity',
       selectedImgIdx: 'change-background-img',
+      selectedPauseIdx: 'change-pause',
     } as Record<keyof Settings, string>;
 
     Object.entries(eventsToListenTo).forEach(([k, v]) => {
       window.ipcRenderer.on(v, (_, setting) => {
-        this.settings = { ...this.settings, [k]: setting };
+        this.updateSettings({ [k]: setting });
       });
     });
 
     window.ipcRenderer.on('change-hotkey', (_, keyBinds: ChangeKeyboardShortcut) => {
-      this.settings = {
-        ...this.settings,
-        ...keyBinds,
-      };
+      this.updateSettings(keyBinds);
+    });
+
+    window.ipcRenderer.on('change-interval', (_, selectedIntervalIdx: number) => {
+      this.updateSettings({ selectedIntervalIdx });
+      this.startTimers();
+    });
+  }
+
+  setUpTimer() {
+    window.ipcRenderer.on('setup-timers', () => {
+      window.ipcRenderer.invoke('change-pause', this.settings.selectedPauseIdx);
+      window.ipcRenderer.invoke('change-interval', this.settings.selectedIntervalIdx);
     });
   }
 
@@ -222,6 +288,7 @@ export default class App extends Vue {
       this.setUpHotkey();
       this.setUpHotkeyListener();
       this.initShowScreen();
+      this.setUpTimer();
     }
 
     // those need to be handled in every BrowserWindow

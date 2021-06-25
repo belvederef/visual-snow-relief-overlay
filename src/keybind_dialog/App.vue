@@ -4,7 +4,6 @@
 </template>
 
 <script lang="ts">
-import type { ChangeKeyboardShortcut } from '../types';
 import { Component, Vue } from 'vue-property-decorator';
 import KeybindInput from './components/KeybindInput.vue';
 
@@ -12,10 +11,10 @@ import KeybindInput from './components/KeybindInput.vue';
 export default class App extends Vue {
   async handleUpdate(keyBinds: ChangeKeyboardShortcut) {
     await window.ipcRenderer.invoke('change-hotkey', keyBinds);
-    this.closeWindow()
+    this.closeWindow();
   }
   closeWindow() {
-    window.ipcRenderer.invoke('close-keybind-dialog')
+    window.ipcRenderer.invoke('close-keybind-dialog');
   }
 }
 </script>

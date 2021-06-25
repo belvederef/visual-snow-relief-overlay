@@ -1,7 +1,7 @@
 <template lang="pug">
 div(style="margin-top: 5px;")
   label.select(for='slct')
-    select#slct(required v-model="selectedImageIdxValue")
+    select#slct(required v-model="selectedIdxValue" :disabled="isDisabled")
       option(v-for="(option, idx) in options" :key="option.title" :value="idx") {{option.title}}
     svg
       use(xlink:href='#select-arrow-down')
@@ -12,19 +12,19 @@ div(style="margin-top: 5px;")
 </template>
 
 <script lang="ts">
-import { BackgroundImage } from '@/types';
 import { Vue, Component, Prop } from 'vue-property-decorator';
 
 @Component
 export default class Dropdown extends Vue {
   @Prop(Array) readonly options!: BackgroundImage[];
-  @Prop(Number) readonly selectedImageIdx!: number;
+  @Prop(Number) readonly selectedIdx!: number;
+  @Prop({ default: false }) readonly isDisabled!: boolean;
 
-  get selectedImageIdxValue(): number {
-    return this.selectedImageIdx;
+  get selectedIdxValue(): number {
+    return this.selectedIdx;
   }
 
-  set selectedImageIdxValue(value: number) {
+  set selectedIdxValue(value: number) {
     this.$emit('change', value);
   }
 }

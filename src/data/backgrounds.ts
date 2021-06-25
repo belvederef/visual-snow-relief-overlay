@@ -1,5 +1,3 @@
-import { BackgroundImage } from '@/types';
-
 export default [
   {
     title: 'Black & White 1',

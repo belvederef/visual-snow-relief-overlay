@@ -13,7 +13,6 @@ import { createProtocol } from 'vue-cli-plugin-electron-builder/lib';
 import installExtension, { VUEJS_DEVTOOLS } from 'electron-devtools-installer';
 import { autoUpdater } from 'electron-updater';
 import * as path from 'path';
-import { ChangeKeyboardShortcut } from './types';
 
 const isDevelopment = process.env.NODE_ENV !== 'production';
 
@@ -56,17 +55,19 @@ const createWindow = async (
       // contextIsolation: true,
       preload: preloadPath,
     },
-    show: false,
   });
   win.setVisibleOnAllWorkspaces(true, { visibleOnFullScreen: true });
   win.setAlwaysOnTop(true, 'screen-saver');
   win.setPosition(display.bounds.x, display.bounds.y);
   win.setSize(display.size.width, display.size.height);
-  win.once('ready-to-show', async () => {
-    await onReadyCb(win);
-    win.show();
+  const waitForShow = new Promise(resolve => {
+    win.once('ready-to-show', async () => {
+      await onReadyCb(win);
+      resolve(true);
+    });
   });
   await loadWinUrl(win, `index.html?monitor-idx=${wins.length + 1}`);
+  await waitForShow;
   wins.push(win);
 };
 
@@ -81,6 +82,7 @@ const createKeybindDialog = async () => {
     width: 300,
     height: 150,
     modal: true,
+    frame: true,
     parent: primaryWindow,
     webPreferences: {
       nodeIntegration,
@@ -139,6 +141,9 @@ if (isDevelopment) {
   }
 }
 
+const sendPropsToAll = (channel: string) => (_: any, ...args: any[]) => {
+  wins.forEach(w => w.webContents.send(channel, ...args));
+};
 /**
  * Custom events
  */
@@ -148,13 +153,10 @@ ipcMain.handle('is-mouse-active', async (_, isMouseActive: boolean) => {
   if (!wins.length || keyBindDialog) return;
   wins.forEach(w => w.setIgnoreMouseEvents(!isMouseActive));
 });
-ipcMain.handle('change-overlay-opacity', (_, opacity: number) => {
-  wins.forEach(w => w.webContents.send('change-overlay-opacity', opacity));
-});
-ipcMain.handle('change-background-img', (_, imgIdx: number) => {
-  wins.forEach(w => w.webContents.send('change-background-img', imgIdx));
-});
-
+ipcMain.handle('change-overlay-opacity', sendPropsToAll('change-overlay-opacity'));
+ipcMain.handle('change-background-img', sendPropsToAll('change-background-img'));
+ipcMain.handle('change-interval', sendPropsToAll('change-interval'));
+ipcMain.handle('change-pause', sendPropsToAll('change-pause'));
 /**
  * Register menu open/close hotkey
  * We don't need to wait for all the windows as this is
@@ -220,6 +222,8 @@ app.on('ready', async () => {
   for (const display of screen.getAllDisplays()) {
     await createWindow(display);
   }
+
+  wins.forEach(win => win.webContents.send('setup-timers'));
 
   // We need to check this after we create all the windows
   // So the event is passed to all of them.

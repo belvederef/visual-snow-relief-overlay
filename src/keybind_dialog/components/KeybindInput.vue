@@ -14,7 +14,6 @@ import hotkeys from 'hotkeys-js';
 import { getKeycodeKeyName } from '@/utils';
 import { Component, Emit } from 'vue-property-decorator';
 import Vue from 'vue';
-import { ChangeKeyboardShortcut } from '@/types';
 
 @Component
 export default class KeybindInput extends Vue {

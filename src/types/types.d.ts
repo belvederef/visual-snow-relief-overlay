@@ -1,17 +1,19 @@
-export interface Settings {
+interface Settings {
   opacity: number;
   selectedImgIdx: number;
+  selectedIntervalIdx: number;
+  selectedPauseIdx: number;
   keyboardShortcutElectron: string;
   keyboardShortcutDisplay: string;
   showScreenNextTime: boolean;
 }
 
-export type ChangeKeyboardShortcut = Pick<
+type ChangeKeyboardShortcut = Pick<
   Settings,
   'keyboardShortcutElectron' | 'keyboardShortcutDisplay'
 >;
 
-export interface BackgroundImage {
+interface BackgroundImage {
   title: string;
   path: string;
 }
