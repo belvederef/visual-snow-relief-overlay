@@ -213,6 +213,18 @@ const checkIfShouldShowScreen: Promise<boolean> = new Promise(resolve => {
 });
 
 /**
+ * If there is another instance running, focus the menu on the current one
+ */
+const gotTheLock = app.requestSingleInstanceLock();
+
+if (!gotTheLock) app.quit();
+else {
+  app.on('second-instance', () => {
+    wins.forEach(w => w.webContents.send('menu-hotkey-pressed'));
+  });
+}
+
+/**
  * This method will be called when Electron has finished
  * initialization and is ready to create browser windows.
  * Some APIs can only be used after this event occurs.
