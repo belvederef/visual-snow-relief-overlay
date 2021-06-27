@@ -19,6 +19,9 @@
             target="_blank"
           )
             img#support-button(src="/assets/support.png")
+        .center-aligned
+          button.play-pause.play-pause__start(@click="onPlayPauseButtonPress" v-if="isPaused") Play
+          button.play-pause.play-pause__stop(@click="onPlayPauseButtonPress" v-else) Pause
         .right-aligned
           button.button__traffic.button__traffic__minimize(@click="menuToggle()") –
           button.button__traffic.button__traffic__close(@click="closeWindow()") x
@@ -189,6 +192,11 @@ export default class App extends Vue {
     compClasses.remove('trasition-active');
   }
 
+  handlePlayPauseClick() {
+    document.querySelector('.play-pause')?.classList.toggle('paused');
+    this.isPaused = !this.isPaused;
+  }
+
   onIntervalChange(intervalIdx: number) {
     window.ipcRenderer.invoke('change-interval', intervalIdx);
   }
@@ -211,6 +219,10 @@ export default class App extends Vue {
 
   onBackgroundImgChange(idx: number) {
     window.ipcRenderer.invoke('change-overlay-image', idx);
+  }
+
+  onPlayPauseButtonPress() {
+    window.ipcRenderer.invoke('change-play-status', !this.isPaused);
   }
 
   logToConsole(loggable: unknown) {
@@ -293,6 +305,10 @@ export default class App extends Vue {
       window.ipcRenderer.on(v, (_, setting) => {
         this.updateSettings({ [k]: setting });
       });
+    });
+
+    window.ipcRenderer.on('change-play-status', (_, status: boolean) => {
+      this.isPaused = status;
     });
 
     window.ipcRenderer.on('change-hotkey', (_, keyBinds: ChangeKeyboardShortcut) => {

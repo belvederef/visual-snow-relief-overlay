@@ -48,10 +48,13 @@ $textColor: rgb(41, 41, 41);
   font-weight: 700;
   cursor: grabbing;
   display: grid;
-  grid-template-columns: 50% 50%;
+  grid-template-columns: 33% 33% 33%;
 
   .left-aligned {
     text-align: left;
+  }
+  .center-aligned {
+    text-align: center;
   }
   .right-aligned {
     text-align: right;
@@ -150,5 +153,39 @@ $register-bkg: rgb(18, 79, 119);
   transition: 0.4s;
   &:hover {
     background-color: darken($register-bkg, 5%);
+  }
+}
+
+.play-pause {
+  background-color: white; /* Green */
+  border: none;
+  color: black;
+  display: inline-block;
+  position: relative;
+  padding: 5px 20px;
+  top: 3px;
+  border-radius: 60px;
+  text-align: center;
+  text-decoration: none;
+  font-size: 12px;
+  transition: 0.3s;
+  cursor: pointer;
+
+  &__stop {
+    border: 1px #d82727 solid;
+
+    &:hover {
+      background-color: #d82727;
+      color: white;
+    }
+  }
+
+  &__start {
+    border: 1px #4caf50 solid;
+
+    &:hover {
+      background-color: #4caf50;
+      color: white;
+    }
   }
 }

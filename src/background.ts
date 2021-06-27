@@ -13,6 +13,7 @@ import { createProtocol } from 'vue-cli-plugin-electron-builder/lib';
 import installExtension, { VUEJS_DEVTOOLS } from 'electron-devtools-installer';
 import { autoUpdater } from 'electron-updater';
 import * as path from 'path';
+import { IpcMainInvokeEvent } from 'electron/main';
 
 const isDevelopment = process.env.NODE_ENV !== 'production';
 
@@ -141,9 +142,16 @@ if (isDevelopment) {
   }
 }
 
-const sendPropsToAll = (channel: string) => (_: any, ...args: any[]) => {
-  wins.forEach(w => w.webContents.send(channel, ...args));
+type IpcListener = (event: IpcMainInvokeEvent, ...args: any[]) => any;
+
+/**
+ * Forwards the event to all the windows
+ * @returns a tuple of the channel name and the listener function
+ */
+const sendPropsToAll = (channel: string): [string, IpcListener] => {
+  return [channel, (_, ...args) => wins.forEach(w => w.webContents.send(channel, ...args))];
 };
+
 /**
  * Custom events
  */
@@ -153,11 +161,12 @@ ipcMain.handle('is-mouse-active', async (_, isMouseActive: boolean) => {
   if (!wins.length || keyBindDialog) return;
   wins.forEach(w => w.setIgnoreMouseEvents(!isMouseActive));
 });
-ipcMain.handle('change-overlay-opacity', sendPropsToAll('change-overlay-opacity'));
-ipcMain.handle('change-overlay-speed', sendPropsToAll('change-overlay-speed'));
-ipcMain.handle('change-overlay-image', sendPropsToAll('change-overlay-image'));
-ipcMain.handle('change-interval', sendPropsToAll('change-interval'));
-ipcMain.handle('change-pause', sendPropsToAll('change-pause'));
+ipcMain.handle(...sendPropsToAll('change-overlay-opacity'));
+ipcMain.handle(...sendPropsToAll('change-overlay-speed'));
+ipcMain.handle(...sendPropsToAll('change-play-status'));
+ipcMain.handle(...sendPropsToAll('change-overlay-image'));
+ipcMain.handle(...sendPropsToAll('change-interval'));
+ipcMain.handle(...sendPropsToAll('change-pause'));
 /**
  * Register menu open/close hotkey
  * We don't need to wait for all the windows as this is
