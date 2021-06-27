@@ -1,9 +1,6 @@
 <template lang="pug">
   #app
-    img#background-img(
-      :src="backgroundImages[settings.selectedImgIdx].path"
-      :style="{ opacity: cssOpacity }"
-    )
+    div#static-wrapper(:style="staticStyles")
 
     vue-draggable-resizable#vue-draggable(
       v-show="shouldShowScreen"
@@ -51,6 +48,19 @@
               :marks="true"
               @change="onOpacityChange"
             )
+          br
+          br
+          label Speed
+            vue-slider.slider(
+              :enable-cross="false"
+              :value="settings.speed"
+              :min="1"
+              :max="MAX_SPEED"
+              :adsorb="true"
+              :interval="1"
+              :marks="true"
+              @change="onSpeedChange"
+            )
       div.info
         checkbox(label="See this screen the next time", :checked="settings.showScreenNextTime" @change="onShowNextTimeChange")
         button#register-keybind-button(@click="openRegisterKeybindDialog") Register new keybind for menu
@@ -69,6 +79,7 @@ import { INTERVALS, PAUSES } from '@/data/timer';
 import 'vue-slider-component/theme/antd.css';
 
 const DEFAULT_SETTINGS: Settings = {
+  speed: 10,
   opacity: 8,
   keyboardShortcutElectron: 'CommandOrControl+Alt+0',
   keyboardShortcutDisplay: 'Ctrl+Alt+0',
@@ -80,7 +91,7 @@ const DEFAULT_SETTINGS: Settings = {
 
 const MENU_SIZE = {
   WIDTH: 600,
-  HEIGHT: 550,
+  HEIGHT: 600,
 };
 
 @Component({
@@ -95,6 +106,7 @@ const MENU_SIZE = {
 })
 export default class App extends Vue {
   /** UI */
+  MAX_SPEED = 20;
   activeTimeout: NodeJS.Timer | null = null;
   pauseTimeout: NodeJS.Timer | null = null;
   isMenuOpen = false;
@@ -124,6 +136,16 @@ export default class App extends Vue {
       : DEFAULT_SETTINGS;
   })();
 
+  get staticStyles(): StaticStylesInterface {
+    const { path, steps } = this.backgroundImages[this.settings.selectedImgIdx];
+    return {
+      '--static-background': `url(${path})`,
+      '--static-opacity': this.cssOpacity,
+      '--static-steps': steps,
+      '--static-animation-duration': this.overlayAnimationDuration + 's',
+    };
+  }
+
   get settings(): Settings {
     return this.privateSettings;
   }
@@ -143,6 +165,10 @@ export default class App extends Vue {
 
   get cssOpacity(): number {
     return this.isPaused ? 0 : this.settings.opacity / 200;
+  }
+
+  get overlayAnimationDuration(): string {
+    return ((this.MAX_SPEED + 1 - this.settings.speed) / 10).toFixed(1);
   }
 
   get shouldShowScreen(): boolean {
@@ -175,12 +201,16 @@ export default class App extends Vue {
     window.ipcRenderer.invoke('change-overlay-opacity', opacity);
   }
 
+  onSpeedChange(speed: number) {
+    window.ipcRenderer.invoke('change-overlay-speed', speed);
+  }
+
   onShowNextTimeChange(showScreenNextTime: boolean) {
     this.settings = { ...this.settings, showScreenNextTime };
   }
 
   onBackgroundImgChange(idx: number) {
-    window.ipcRenderer.invoke('change-background-img', idx);
+    window.ipcRenderer.invoke('change-overlay-image', idx);
   }
 
   logToConsole(loggable: unknown) {
@@ -254,7 +284,8 @@ export default class App extends Vue {
   handleSettingsChanges() {
     const eventsToListenTo = {
       opacity: 'change-overlay-opacity',
-      selectedImgIdx: 'change-background-img',
+      speed: 'change-overlay-speed',
+      selectedImgIdx: 'change-overlay-image',
       selectedPauseIdx: 'change-pause',
     } as Record<keyof Settings, string>;
 

@@ -1,22 +1,29 @@
-export default [
+const backgrounds: BackgroundImage[] = [
   {
     title: 'Black & White 1',
-    path: '/assets/static1.gif',
+    path: '/assets/static1.png',
+    steps: 5,
   },
   {
     title: 'Black & White 2',
-    path: '/assets/static2.gif',
+    path: '/assets/static2.png',
+    steps: 7,
   },
   {
     title: 'Black & White Pixelated',
-    path: '/assets/static4.gif',
+    path: '/assets/static4.png',
+    steps: 4,
   },
   {
     title: 'Fine Dots',
-    path: '/assets/static6.gif',
+    path: '/assets/static6.png',
+    steps: 3,
   },
   {
     title: 'Colour 1',
-    path: '/assets/static3.gif',
+    path: '/assets/static3.png',
+    steps: 10,
   },
-] as BackgroundImage[];
+];
+
+export default backgrounds;

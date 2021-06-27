@@ -154,7 +154,8 @@ ipcMain.handle('is-mouse-active', async (_, isMouseActive: boolean) => {
   wins.forEach(w => w.setIgnoreMouseEvents(!isMouseActive));
 });
 ipcMain.handle('change-overlay-opacity', sendPropsToAll('change-overlay-opacity'));
-ipcMain.handle('change-background-img', sendPropsToAll('change-background-img'));
+ipcMain.handle('change-overlay-speed', sendPropsToAll('change-overlay-speed'));
+ipcMain.handle('change-overlay-image', sendPropsToAll('change-overlay-image'));
 ipcMain.handle('change-interval', sendPropsToAll('change-interval'));
 ipcMain.handle('change-pause', sendPropsToAll('change-pause'));
 /**

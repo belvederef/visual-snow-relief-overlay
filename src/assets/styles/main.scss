@@ -96,13 +96,35 @@ $textColor: rgb(41, 41, 41);
   }
 }
 
-#background-img {
+#static-wrapper {
   pointer-events: none;
   position: absolute;
   width: 100%;
+  animation: anim 1s steps(10) infinite;
   height: 100%;
-  z-index: -1;
+  z-index: -1000;
 }
+
+#static-wrapper::after {
+  content: '';
+  background: var(--static-background) no-repeat;
+  background-size: cover;
+  opacity: var(--static-opacity);
+  top: 0;
+  left: 0;
+  bottom: 0;
+  right: 0;
+  animation: anim var(--static-animation-duration) steps(var(--static-steps)) infinite;
+  position: absolute;
+  z-index: -1000;
+}
+
+@keyframes anim {
+  100% {
+    background-position: -2500px;
+  }
+}
+
 #app {
   display: grid;
   min-height: 100vh;
