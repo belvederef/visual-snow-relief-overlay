@@ -1,6 +1,6 @@
 export const INTERVALS = [
   {
-    title: 'Continous',
+    title: 'Continuous',
     value: 0,
   },
   {
