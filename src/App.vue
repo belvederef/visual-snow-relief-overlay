@@ -217,11 +217,6 @@ export default class App extends Vue {
     compClasses.remove('trasition-active');
   }
 
-  handlePlayPauseClick() {
-    document.querySelector('.play-pause')?.classList.toggle('paused');
-    this.isPaused = !this.isPaused;
-  }
-
   onIntervalChange(intervalIdx: number) {
     window.ipcRenderer.invoke('change-interval', intervalIdx);
   }
