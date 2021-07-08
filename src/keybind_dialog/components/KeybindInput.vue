@@ -2,18 +2,26 @@
   div
     div.button-container
       button.option.option__save(@click="updateKeybind") Save
-      button.option.option__cancel(@click="closeWindow" style="margin-right: 0") Cancel
+      button.option.option__cancel(
+        @click="closeWindow" 
+        style="margin-right: 0"
+      ) Cancel
     div(v-if="!currentPressedKeycodes.length")
-      <p style="margin: 0; text-align: center; margin: 10px 0;">Waiting for input...</p>
+      p(
+        style="margin: 0; text-align: center; margin: 10px 0;"
+      ) Waiting for input...
       div.loader(v-if="!currentPressedKeycodes.length")
-    p.key-bind(v-else, style="margin-top: 20px; font-family: Roboto") {{keyCodesDisplay}}
+    p.key-bind(
+      v-else, 
+      style="margin-top: 20px; font-family: Roboto"
+    ) {{ keyCodesDisplay }}
 </template>
 
 <script lang="ts">
 import hotkeys from 'hotkeys-js';
-import { getKeycodeKeyName } from '@/utils';
 import { Component, Emit } from 'vue-property-decorator';
 import Vue from 'vue';
+import { getKeycodeKeyName } from '@/utils';
 
 @Component
 export default class KeybindInput extends Vue {
@@ -21,12 +29,6 @@ export default class KeybindInput extends Vue {
 
   get keyCodesDisplay(): string {
     return this.getKeyBind(true);
-  }
-
-  mounted() {
-    hotkeys('*', { keyup: false }, () => {
-      this.currentPressedKeycodes = hotkeys.getPressedKeyCodes();
-    });
   }
 
   @Emit()
@@ -51,6 +53,12 @@ export default class KeybindInput extends Vue {
 
   resetKeybind() {
     this.currentPressedKeycodes = [];
+  }
+
+  mounted() {
+    hotkeys('*', { keyup: false }, () => {
+      this.currentPressedKeycodes = hotkeys.getPressedKeyCodes();
+    });
   }
 }
 </script>

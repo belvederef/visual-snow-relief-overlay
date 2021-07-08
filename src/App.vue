@@ -20,8 +20,14 @@
           )
             img#support-button(src="/assets/support.png")
         .center-aligned
-          button.play-pause.play-pause__start(@click="onPlayPauseButtonPress" v-if="isPaused") Play
-          button.play-pause.play-pause__stop(@click="onPlayPauseButtonPress" v-else) Pause
+          button.play-pause.play-pause__start(
+            v-if="isPaused"
+            @click="onPlayPauseButtonPress" 
+          ) Play
+          button.play-pause.play-pause__stop(
+            v-else
+            @click="onPlayPauseButtonPress"
+          ) Pause
         .right-aligned
           button.button__traffic.button__traffic__minimize(@click="menuToggle()") –
           button.button__traffic.button__traffic__close(@click="closeWindow()") x
@@ -29,16 +35,29 @@
         .group
           label Choose background
             br
-            dropdown(@change="onBackgroundImgChange" :options="backgroundImages" :selected-idx="settings.selectedImgIdx")
+            dropdown(
+              @change="onBackgroundImgChange" 
+              :options="backgroundImages" 
+              :selected-idx="settings.selectedImgIdx"
+            )
           br
           div(style="display: flex; flex-align: row; justify-content: space-between;")
             label Choose interval
               br
-              dropdown(@change="onIntervalChange" :options="intervals" :selected-idx="settings.selectedIntervalIdx")
+              dropdown(
+                @change="onIntervalChange" 
+                :options="intervals" 
+                :selected-idx="settings.selectedIntervalIdx"
+              )
             br
             label Choose pause
               br
-              dropdown(@change="onPauseChange" :options="pauses" :selected-idx="settings.selectedPauseIdx" :is-disabled="settings.selectedIntervalIdx === 0")
+              dropdown(
+                @change="onPauseChange" 
+                :options="pauses" 
+                :selected-idx="settings.selectedPauseIdx" 
+                :is-disabled="settings.selectedIntervalIdx === 0"
+              )
         .group
           label Opacity level
             vue-slider.slider(
@@ -65,9 +84,15 @@
               @change="onSpeedChange"
             )
       div.info
-        checkbox(label="See this screen the next time", :checked="settings.showScreenNextTime" @change="onShowNextTimeChange")
-        button#register-keybind-button(@click="openRegisterKeybindDialog") Register new keybind for menu
-        p Press {{this.settings.keyboardShortcutDisplay}} to open/close this menu at any time
+        checkbox(
+          label="See this screen the next time", 
+          :checked="settings.showScreenNextTime" 
+          @change="onShowNextTimeChange"
+        )
+        button#register-keybind-button(
+          @click="openRegisterKeybindDialog"
+        ) Register new keybind for menu
+        p Press {{ this.settings.keyboardShortcutDisplay }} to open/close this menu at any time
 </template>
 
 <script lang="ts">

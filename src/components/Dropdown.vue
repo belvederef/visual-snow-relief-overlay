@@ -1,14 +1,22 @@
 <template lang="pug">
-div(style="margin-top: 5px;")
-  label.select(for='slct')
-    select#slct(required v-model="selectedIdxValue" :disabled="isDisabled")
-      option(v-for="(option, idx) in options" :key="option.title" :value="idx") {{option.title}}
-    svg
-      use(xlink:href='#select-arrow-down')
+  div(style="margin-top: 5px;")
+    label.select(for='slct')
+      select#slct(
+        required 
+        v-model="selectedIdxValue" 
+        :disabled="isDisabled"
+      )
+        option(
+          v-for="(option, idx) in options" 
+          :key="option.title" 
+          :value="idx"
+        ) {{ option.title }}
+      svg
+        use(xlink:href='#select-arrow-down')
 
-  svg.sprites
-    symbol#select-arrow-down(viewbox='0 0 10 6')
-      polyline(points="1 1 5 5 9 1")
+    svg.sprites
+      symbol#select-arrow-down(viewbox='0 0 10 6')
+        polyline(points="1 1 5 5 9 1")
 </template>
 
 <script lang="ts">
