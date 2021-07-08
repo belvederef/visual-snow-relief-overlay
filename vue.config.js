@@ -1,4 +1,11 @@
 module.exports = {
+  pages: {
+    index: {
+      entry: './src/main.ts',
+      template: './public/index.html',
+    },
+    keybind_dialog: './src/keybind_dialog/main.ts',
+  },
   pluginOptions: {
     electronBuilder: {
       preload: 'src/preload.ts',
