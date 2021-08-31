@@ -47,7 +47,6 @@ const createWindow = async (
   const win = new BrowserWindow({
     transparent: true,
     frame: false,
-    focusable: process.platform !== 'linux',
     hasShadow: false,
     // @ts-ignore global var
     icon: path.join(__static, 'icon.png'),
