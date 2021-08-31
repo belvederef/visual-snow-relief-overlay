@@ -104,7 +104,6 @@ export default class Checkbox extends Vue {
       span {
         line-height: 22px;
         font-size: 16px;
-        color: var(--text, #646b8c);
         font-weight: 500;
         display: inline-block;
         vertical-align: top;
