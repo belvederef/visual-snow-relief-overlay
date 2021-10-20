@@ -196,7 +196,7 @@ export default class App extends Vue {
   }
 
   get overlayAnimationDuration(): string {
-    return ((this.MAX_SPEED + 1 - this.settings.speed) / 10).toFixed(1);
+    return ((this.MAX_SPEED + 1 - this.settings.speed) / 15).toFixed(1);
   }
 
   get shouldShowScreen(): boolean {
