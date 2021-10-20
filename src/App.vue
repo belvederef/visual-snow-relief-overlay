@@ -110,7 +110,7 @@ const DEFAULT_SETTINGS: Settings = {
   speed: 10,
   opacity: 8,
   keyboardShortcutElectron: 'CommandOrControl+Alt+0',
-  keyboardShortcutDisplay: 'Ctrl+Alt+0',
+  keyboardShortcutDisplay: 'Ctrl+Alt+0 (or Cmd+Option+0 on Mac)',
   selectedImgIdx: 0,
   selectedPauseIdx: 0,
   selectedIntervalIdx: 0,
