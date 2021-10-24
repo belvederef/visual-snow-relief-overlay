@@ -13,6 +13,10 @@ yarn electron:serve # or npm run electron:serve
 ```
 
 ## Building and Publishing Instructions
+> ❗ **The project artifacts are built automatically when a new tag is pushed!**
+> 
+> There is no need to build the app on different OSs manually. When a new tag starting with "v" is pushed, a Github Action builds the artifacts for all platform. These artifacts still need to manually be included in the release "assets". More information at https://github.com/belvederef/visual-snow-relief-overlay/blob/main/.github/workflows/build.yml.
+
 
 You can only build the files from the respective OSs. Unless you own such systems, to deploy use a Docker container for Windows and a VM for Mac.
 
