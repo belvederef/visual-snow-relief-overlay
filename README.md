@@ -48,6 +48,8 @@ The app is provided as both an installer (.exe file with "Setup" in the name) an
 
 The app is provided as both an installer (.dmg) and a compressed executable (.7z). The installer is recommended, as you will receive updates that improve the app automatically.
 
+The first time you lauch the app, its execution might be halted as the app is not signed. To vercome this, you need to right click on the app icon, select "Open" from the context menu, and then click "Open" again in the popup.
+
 ### Linux
 
 The app is provided as an AppImage executable file that automatically receives updates. To make the file executable after download, run the following line replacing `FILE_NAME` with the name of the package you downloaded:
