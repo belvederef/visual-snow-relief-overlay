@@ -11,7 +11,7 @@ module.exports = {
       preload: 'src/preload.ts',
       builderOptions: {
         appId: 'com.belvederef.vs-overlay',
-        copyright: 'Copyright © 2020 Francesco Belvedere',
+        copyright: 'Copyright © 2021 Francesco Belvedere',
         productName: 'VS Relief Overlay',
         mac: {
           target: ['dmg', '7z'],
