@@ -36,7 +36,7 @@ The causes of visual snow syndrome are currently unknown. Some key features of t
 
 ## Download
 
-> ❗**UPDATE**: VS Relief Overlay is now available for Android at https://play.google.com/store/apps/details?id=eu.belvederef.vs_relief_overlay
+> ❗📱 **UPDATE**: VS Relief Overlay is now available for Android at https://play.google.com/store/apps/details?id=eu.belvederef.vs_relief_overlay
 
 Download the latest package available for your operating system from the [release page](https://github.com/belvederef/visual-snow-relief-overlay/releases). Read below for notes on the versions provided.
 
@@ -48,7 +48,7 @@ The app is provided as both an installer (.exe file with "Setup" in the name) an
 
 The app is provided as both an installer (.dmg) and a compressed executable (.7z). The installer is recommended, as you will receive updates that improve the app automatically.
 
-The first time you lauch the app, its execution might be halted as the app is not signed. To vercome this, you need to right click on the app icon, select "Open" from the context menu, and then click "Open" again in the popup.
+The first time you lauch the app, its execution might be halted as the app is not signed. To overcome this, you need to right click on the app icon, select "Open" from the context menu, and then click "Open" again in the popup.
 
 ### Linux
 
