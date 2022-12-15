@@ -76,7 +76,7 @@
             vue-slider.slider(
               :enable-cross="false"
               :value="settings.speed"
-              :min="1"
+              :min="0"
               :max="MAX_SPEED"
               :adsorb="true"
               :interval="1"
@@ -196,6 +196,7 @@ export default class App extends Vue {
   }
 
   get overlayAnimationDuration(): string {
+    if (this.settings.speed === 0) return '0';
     return ((this.MAX_SPEED + 1 - this.settings.speed) / 15).toFixed(1);
   }
 

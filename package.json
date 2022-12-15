@@ -1,6 +1,6 @@
 {
   "name": "visual-snow-relief-overlay",
-  "version": "1.5.2",
+  "version": "1.6.0",
   "author": "belvederef <francescobelvedere@hotmail.com>",
   "description": "A screen overlay that might help people affected by the visual snow syndrome",
   "scripts": {
@@ -54,9 +54,14 @@
     "sass": "^1.30.0",
     "sass-loader": "^8.0.0",
     "typescript": "~3.9.6",
-    "vue-cli-plugin-electron-builder": "~2.0.0-rc.5",
+    "vue-cli-plugin-electron-builder": "^2.1.1",
     "vue-template-compiler": "^2.6.12",
     "vuex-module-decorators": "^1.0.1"
+  },
+  "overrides": {
+    "vue-cli-plugin-electron-builder": {
+      "electron-builder": "^23.1.0"
+    }
   },
   "husky": {
     "hooks": {
