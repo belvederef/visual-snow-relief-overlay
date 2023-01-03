@@ -58,10 +58,8 @@
     "vue-template-compiler": "^2.6.12",
     "vuex-module-decorators": "^1.0.1"
   },
-  "overrides": {
-    "vue-cli-plugin-electron-builder": {
-      "electron-builder": "^23.1.0"
-    }
+  "resolutions": {
+    "vue-cli-plugin-electron-builder/electron-builder": "23.6.0"
   },
   "husky": {
     "hooks": {
