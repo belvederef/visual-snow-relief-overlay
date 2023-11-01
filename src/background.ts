@@ -42,7 +42,8 @@ const wins: BrowserWindow[] = [];
 const createWindow = async (
   onReadyCb: (w: BrowserWindow) => Promise<void> = async () => {},
 ) => {
-let width = 0;
+  // calculate the longest width and height to span over the entire workspace
+  let width = 0;
   let height = 0;
   for (const display of screen.getAllDisplays()) {
     width = Math.max(display.bounds.x + display.size.width, height);
