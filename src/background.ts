@@ -40,14 +40,21 @@ const loadWinUrl = async (win: BrowserWindow, path: string) => {
 const wins: BrowserWindow[] = [];
 
 const createWindow = async (
-  display: Electron.Display,
   onReadyCb: (w: BrowserWindow) => Promise<void> = async () => {},
 ) => {
+let width = 0;
+  let height = 0;
+  for (const display of screen.getAllDisplays()) {
+    width = Math.max(display.bounds.x + display.size.width, height);
+    height = Math.max(display.bounds.y + display.size.height, height);
+  }
+
   // Create the browser window.
   const win = new BrowserWindow({
     transparent: true,
     frame: false,
     hasShadow: false,
+    enableLargerThanScreen: true,
     // @ts-ignore global var
     icon: path.join(__static, 'icon.png'),
     webPreferences: {
@@ -58,8 +65,9 @@ const createWindow = async (
   });
   win.setVisibleOnAllWorkspaces(true, { visibleOnFullScreen: true });
   win.setAlwaysOnTop(true, 'screen-saver');
-  win.setPosition(display.bounds.x, display.bounds.y);
-  win.setSize(display.size.width, display.size.height);
+
+  win.setPosition(0, 0);
+  win.setSize(width, height);
   const waitForShow = new Promise(resolve => {
     win.once('ready-to-show', async () => {
       await onReadyCb(win);
@@ -71,7 +79,7 @@ const createWindow = async (
   wins.push(win);
 };
 
-const setIgnoreMouseEvents = (ignore: boolean = true) => {
+const setIgnoreMouseEvents = (ignore = true) => {
   wins.forEach(w => w.setIgnoreMouseEvents(ignore));
 };
 
@@ -81,18 +89,14 @@ const createKeybindDialog = async () => {
   keyBindDialog = new BrowserWindow({
     width: 300,
     height: 150,
-    modal: true,
     frame: true,
+    modal: true,
     parent: primaryWindow,
     webPreferences: {
       nodeIntegration,
       preload: preloadPath,
     },
   });
-  const { width: primaryDisplayWidth } = screen.getPrimaryDisplay().bounds;
-  // We do this for Linux, because it can't be on top so we kinda make sure it's not below
-  keyBindDialog.setPosition(primaryDisplayWidth - keyBindDialog.getSize()[0] - 100, 100);
-  // it's on top but it can't be on top of a non-focusable window in Linux
   keyBindDialog.setAlwaysOnTop(true, 'screen-saver');
   keyBindDialog.removeMenu();
   keyBindDialog.once('ready-to-show', () => {
@@ -120,9 +124,7 @@ app.on('activate', async () => {
   // On macOS it's common to re-create a window in the app when the
   // dock icon is clicked and there are no other windows open.
   if (BrowserWindow.getAllWindows().length === 0) {
-    for (const display of screen.getAllDisplays()) {
-      await createWindow(display);
-    }
+    await createWindow();
   }
 });
 
@@ -158,7 +160,7 @@ ipcMain.handle('is-mouse-active', async (_, isMouseActive: boolean) => {
   // If there's a keyBindDialog on the screen, we can't toggle,
   // otherwise mouse events reset and it can't be clicked
   if (!wins.length || keyBindDialog) return;
-  wins.forEach(w => w.setIgnoreMouseEvents(!isMouseActive));
+  setIgnoreMouseEvents(!isMouseActive);
 });
 ipcMain.handle(...sendPropsToAll('change-overlay-opacity'));
 ipcMain.handle(...sendPropsToAll('change-overlay-speed'));
@@ -240,9 +242,7 @@ app.on('ready', async () => {
       console.error('Vue Devtools failed to install:', e.toString());
     }
   }
-  for (const display of screen.getAllDisplays()) {
-    await createWindow(display);
-  }
+  await createWindow();
 
   wins.forEach(win => win.webContents.send('setup-timers'));
 

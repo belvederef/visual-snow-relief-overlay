@@ -97,7 +97,6 @@
 
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator';
-import ClickOutside from 'vue-click-outside';
 import VueSlider from 'vue-slider-component';
 import Dropdown from '@/components/Dropdown.vue';
 import Checkbox from '@/components/Checkbox.vue';
@@ -127,10 +126,7 @@ const MENU_SIZE = {
     VueSlider,
     Checkbox,
     Dropdown,
-  },
-  directives: {
-    ClickOutside,
-  },
+  }
 })
 export default class App extends Vue {
   /** UI */
