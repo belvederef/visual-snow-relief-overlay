@@ -1,7 +1,7 @@
 {
   "name": "visual-snow-relief-overlay",
   "version": "1.6.0",
-  "author": "belvederef <francescobelvedere@hotmail.com>",
+  "author": "belvederef",
   "description": "A screen overlay that might help people affected by the visual snow syndrome",
   "scripts": {
     "serve": "vue-cli-service serve",
